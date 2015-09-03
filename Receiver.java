@@ -1,12 +1,35 @@
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+
 /**
- * Created by DennisThinhTan on 02-09-2015.
+ * Created by JakeMullit on 02/09/15.
  */
-public class Receiver
-{
+public class Receiver {
 
-    public Receiver()
+    public static void main(String[] args)
     {
+        DatagramSocket socket = null;
+        try
+        {
+            socket = new DatagramSocket(7007);
+            // create socket at agreed port
+            byte[] buffer = new byte[1000];
+            while(true)
+            {
+                DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+                socket.receive(reply);
+                System.out.println("Message has been received "+new String(reply.getData()));
 
+
+            }
+        }
+        catch (SocketException e){System.out.println("Socket: " + e.getMessage());}
+        catch (IOException e) {System.out.println("IO: " + e.getMessage());}
+        finally {if(socket != null) socket.close();}
     }
 
+
 }
+
