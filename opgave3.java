@@ -18,10 +18,14 @@ public class opgave3 {
     HashMap<String,Integer> occurrence = new HashMap<>();
     DatagramSocket sendingSocket;
 
+    ReceiverThread receiver;
+    SendingThread sender;
+    boolean threadActive;
 
 
-    public static void main(String[] args){
-        opgave3 program = new opgave3(21,15,1);
+    public static void main(String[] args)
+    {
+        opgave3 program = new opgave3(21,5,1);
     }
 
     String fillerData;
@@ -30,18 +34,30 @@ public class opgave3 {
 
     public opgave3(int datagramSize, int amountOfDatagramsSent, int transmissionInterval)
     {
+        threadActive = true; //receiever thread will be active until false
         fillerData = createFillerData(datagramSize);
 
         try
         {
             sendingSocket = new DatagramSocket();
-            Thread listenerThread = new Thread(new ReceiverThread(occurrence));
-            Thread senderThread = new Thread(new SendingThread(sendingSocket, transmissionInterval,amountOfDatagramsSent));
+            receiver = new ReceiverThread(occurrence);
+            sender = new SendingThread(sendingSocket, transmissionInterval,amountOfDatagramsSent);
+
+
+            Thread listenerThread = new Thread(receiver);
+            Thread senderThread   = new Thread(sender);
 
             listenerThread.start();
             senderThread.start();
+            System.out.println("Freedom!!!! Calc time!");
         }
         catch (SocketException e) {e.printStackTrace();}
+    }
+
+    public void closeThreads()
+    {
+        threadActive = false;
+
     }
 
 
@@ -69,9 +85,16 @@ public class opgave3 {
     }
 
 
-    public void amountOfLostDatagrams(){}
+    public void amountOfLostDatagrams()
+    {
 
-    public void amountOfLostDatagramsInPercentage(){}
+    }
+
+    public void amountOfLostDatagramsInPercentage(){
+
+        int amountOfPackagesLost = 0;
+
+    }
 
     public void amountOFDuplicateDatagram(){}
 
@@ -97,7 +120,7 @@ public class opgave3 {
                     socket = new DatagramSocket(7007);
                     // create socket at agreed port
                     byte[] buffer = new byte[1000];
-                    while(true)
+                    while(threadActive)
                     {
                         DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
                         socket.receive(reply);
@@ -170,10 +193,16 @@ public class opgave3 {
 
         }
 
+        public String[] getMessageList()
+        {
+            return messageList;
+        }
+
 
         @Override
         public void run()
         {
+
             for (int i = 0; i<messageList.length; i++)
             {
 
@@ -197,6 +226,7 @@ public class opgave3 {
                 try {Thread.sleep(_timeOut);}
                 catch (InterruptedException e) {e.printStackTrace();}
             }
+
         }
     }
 
