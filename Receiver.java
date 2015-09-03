@@ -1,10 +1,10 @@
 /**
  * Created by DennisThinhTan on 02-09-2015.
  */
-public class Reciever
+public class Receiver
 {
 
-    public Reciever()
+    public Receiver()
     {
 
     }
