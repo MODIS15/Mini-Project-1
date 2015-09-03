@@ -6,6 +6,7 @@ public class UDPClient
     public static void main(String args[])
 	{
 		// args give message contents and destination hostname
+
 		DatagramSocket aSocket = null;
 
 		try
@@ -25,6 +26,10 @@ public class UDPClient
 		}
 		catch (SocketException e) {System.out.println("Socket: " + e.getMessage());}
 		catch (IOException e){System.out.println("IO: " + e.getMessage());}
-		finally { if(aSocket != null) aSocket.close(); }
-	}		      	
+		finally { if(aSocket != null) aSocket.close();
+		}
+
+	}
+
+
 }
