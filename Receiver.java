@@ -6,6 +6,11 @@ import java.net.SocketException;
 /**
  * Created by JakeMullit on 02/09/15.
  */
+
+/**
+ * Test class for objective 2.
+ * Prints all received messages
+ */
 public class Receiver {
 
     public static void main(String[] args)
