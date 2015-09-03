@@ -7,6 +7,11 @@ import java.util.HashMap;
  */
 public class opgave3 {
 
+
+    //Minimum String memory usage (bytes) = 8 * (int) ((((no chars) * 2) + 45) / 8)
+    //Simplified : Multiply the number of characters of the String by two; Then add 38;
+
+
     HashMap<String,Integer> occurrence = new HashMap<>();
     DatagramSocket sendingSocket;
 
@@ -15,7 +20,13 @@ public class opgave3 {
         opgave3 program = new opgave3(0,0,2);
     }
 
-    public opgave3(int datagramSize, int amountOfDatagramsSent, int transmissionInterval){
+    String fillerData;
+
+
+
+    public opgave3(int datagramSize, int amountOfDatagramsSent, int transmissionInterval)
+    {
+        fillerData = createFillerData(datagramSize);
 
         try
         {
@@ -28,6 +39,31 @@ public class opgave3 {
         }
         catch (SocketException e) {e.printStackTrace();}
     }
+
+
+
+    private String createFillerData(int memorySize)
+    {
+        //Minimum String memory usage (bytes) = 8 * (int) ((((no chars) * 2) + 45) / 8)
+        //int memorySize = 16+ ((((x) * 2) + 45) / 8);
+
+        int x = ((memorySize-16)*8-45)/2 ;
+        String _filerData = "";
+
+        if(x>0)
+        {
+            char[] fillerData = new char[x];
+            for(int i =0; i<fillerData.length; i++)
+            {
+                fillerData[i] = 'a';
+            }
+
+            _filerData = fillerData.toString();
+        }
+
+        return _filerData;
+    }
+
 
     public void amountOfLostDatagrams(){}
 
@@ -103,8 +139,6 @@ public class opgave3 {
         }
     }
 
-
-
     public class SendingThread implements Runnable{
 
 
@@ -120,7 +154,10 @@ public class opgave3 {
 
             for(int i = 0; i<messageList.length; i++)
             {
-                messageList[i]=""+i;
+                if(i>9)
+                    messageList[i]=i+fillerData;  //Make sure there is two ciffers string. Important for data size
+                else
+                    messageList[i] ="0"+i+fillerData;
             }
         }
 
