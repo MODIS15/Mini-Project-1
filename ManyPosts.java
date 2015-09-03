@@ -4,6 +4,11 @@ import java.net.*;
 /**
  * Created by JakeMullit on 02/09/15.
  */
+
+/**
+ * Test class for assignment 2
+ * This class sends messages to localhost
+ */
 public class ManyPosts {
 
 
