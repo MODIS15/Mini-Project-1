@@ -2,9 +2,12 @@ import java.io.IOException;
 import java.net.*;
 import java.util.HashMap;
 
-/**
- * Created by JakeMullit on 02/09/15.
+/*
+Your programs must accept as input (a) datagram size, (b) number of datagrams sent and (c) interval between transmissions.
+The program must output (1) absolute number and percentage of lost datagrams and (2) absolute number and percentage of duplicated datagrams.
+ It is acceptable if your estimate cannot distinguish between losing a single reply, losing a single response, or losing both a reply and a response.
  */
+
 public class opgave3 {
 
 
@@ -16,8 +19,9 @@ public class opgave3 {
     DatagramSocket sendingSocket;
 
 
+
     public static void main(String[] args){
-        opgave3 program = new opgave3(0,0,2);
+        opgave3 program = new opgave3(21,15,1);
     }
 
     String fillerData;
@@ -32,7 +36,7 @@ public class opgave3 {
         {
             sendingSocket = new DatagramSocket();
             Thread listenerThread = new Thread(new ReceiverThread(occurrence));
-            Thread senderThread = new Thread(new SendingThread(sendingSocket, transmissionInterval));
+            Thread senderThread = new Thread(new SendingThread(sendingSocket, transmissionInterval,amountOfDatagramsSent));
 
             listenerThread.start();
             senderThread.start();
@@ -58,7 +62,7 @@ public class opgave3 {
                 fillerData[i] = 'a';
             }
 
-            _filerData = fillerData.toString();
+            _filerData = new String(fillerData);
         }
 
         return _filerData;
@@ -72,23 +76,6 @@ public class opgave3 {
     public void amountOFDuplicateDatagram(){}
 
     public void amountOFDuplicateDatagramInPercentage(){}
-
-
-
-
-
-    /*
-    Your programs must accept as input (a) datagram size, (b) number of datagrams sent and (c) interval between transmissions.
-    The program must output (1) absolute number and percentage of lost datagrams and (2) absolute number and percentage of duplicated datagrams.
-     It is acceptable if your estimate cannot distinguish between losing a single reply, losing a single response, or losing both a reply and a response.
-     */
-
-
-
-
-
-
-
 
 
 
@@ -139,18 +126,39 @@ public class opgave3 {
         }
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public class SendingThread implements Runnable{
 
 
-        String[] messageList  = new String[20];
+        String[] messageList;
         DatagramSocket socket;
         String IPDestination = "localhost";
         int _timeOut;
 
-        public SendingThread(DatagramSocket socket, int timeOut)
+
+        public SendingThread(DatagramSocket socket, int timeOut, int messagesToBeSent)
         {
             this.socket = socket;
+            messageList  = new String[messagesToBeSent];
             _timeOut = timeOut;
+
 
             for(int i = 0; i<messageList.length; i++)
             {
@@ -159,12 +167,15 @@ public class opgave3 {
                 else
                     messageList[i] ="0"+i+fillerData;
             }
+
         }
+
 
         @Override
         public void run()
         {
-            for (int i = 0; i<messageList.length; i++) {
+            for (int i = 0; i<messageList.length; i++)
+            {
 
                 byte[] message = messageList[i].getBytes();
                 String _message = messageList[i];
@@ -175,7 +186,7 @@ public class opgave3 {
                     InetAddress host = InetAddress.getByName(IPDestination);
                     DatagramPacket packet = new DatagramPacket(message, _message.length(), host, port);
                     socket.send(packet);
-                    Thread.sleep(100*_timeOut);
+                    Thread.sleep(1000*_timeOut);
 
                 }
                 catch (SocketException e) {e.printStackTrace();}
@@ -183,6 +194,8 @@ public class opgave3 {
                 catch (IOException e) {e.printStackTrace();} catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                try {Thread.sleep(_timeOut);}
+                catch (InterruptedException e) {e.printStackTrace();}
             }
         }
     }
