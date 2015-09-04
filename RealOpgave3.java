@@ -1,11 +1,14 @@
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.concurrent.*;
 
 /**
  * Created by rcechab12 on 04-09-2015.
  */
 public class RealOpgave3 {
+
+    public boolean go;
 
     public static void main(String args[])
     {
@@ -15,34 +18,55 @@ public class RealOpgave3 {
 
     public RealOpgave3(int DatagramSize, int NumberOfDatagrams, int IntervalDatagram )
     {
-        DatagramSocket socket = null; //Reciever setup
+        ExecutorService service = Executors.newSingleThreadExecutor();
         try
         {
-            socket = new DatagramSocket(7007);
-            // create socket at agreed port
-            byte[] buffer = new byte[1000];
+            Runnable r = new Runnable() {
+                @Override
+                public void run()
+                {
+                    DatagramSocket socket = null; //Reciever setup
+                    try
+                    {
+                        socket = new DatagramSocket(7007);
+                        // create socket at agreed port
+                        byte[] buffer = new byte[1000];
 
-            //Starts the sender.
-            SenderTread sender = new SenderTread(socket,DatagramSize,NumberOfDatagrams,IntervalDatagram);
-            Thread senderThread = new Thread(sender);
-            senderThread.start();
+                        //Starts the sender.
+                        SenderTread sender = new SenderTread(socket,DatagramSize,NumberOfDatagrams,IntervalDatagram);
+                        Thread senderThread = new Thread(sender);
+                        senderThread.start();
 
-            while(true)
-            {
-                DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-                socket.receive(reply);
-                String message = new String(reply.getData());
-                System.out.println(message);
+                        go = true;
+                        while(go)
+                        {
+                            DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+                            socket.receive(reply);
+                            String message = new String(reply.getData());
+                            System.out.println(message);
+                        }
 
-            }
 
+                    }
+                    //catch (Stop when there has gone 5 seconds, without an response){senderThread.interrupt();}
+                    catch (SocketException e){System.out.println("Socket: " + e.getMessage());}
+                    catch (IOException e) {System.out.println("IO: " + e.getMessage());}
+                    finally {if(socket != null) socket.close();
+                    }
+                }
+            };
+            Future<?> f = service.submit(r);
+            f.get(4, TimeUnit.SECONDS);
 
+        }catch (TimeoutException e){
+            e.printStackTrace();
+            go = false;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        //catch (Stop when there has gone 5 seconds, without an responce){senderThread.interrupt();}
-        catch (SocketException e){System.out.println("Socket: " + e.getMessage());}
-        catch (IOException e) {System.out.println("IO: " + e.getMessage());}
-        finally {if(socket != null) socket.close();
-        }
+
 
     }
 
