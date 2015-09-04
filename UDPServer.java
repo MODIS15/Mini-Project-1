@@ -2,9 +2,12 @@ import java.net.*;
 import java.io.*;
 public class UDPServer
 {
+    private static int messageHashCode;
+
     public static void main(String args[])
 	{
         DatagramSocket aSocket = null;
+
         try
         {
             aSocket = new DatagramSocket(7007);
@@ -16,7 +19,10 @@ public class UDPServer
                 aSocket.receive(request);
                 DatagramPacket receivedRequest = new DatagramPacket(request.getData(), request.getLength(),
                         request.getAddress(), request.getPort());
-                if (requestIsValid(receivedRequest)) {
+                String[] dividedMessage = receivedRequest.getData().toString().split("¤");
+
+                if (requestIsValid(dividedMessage)) {
+                    messageHashCode = Integer.parseInt(dividedMessage[1]);
                     System.out.println("UDP packet from: " + new String(request.getAddress().toString()));
                     System.out.println("Message: " + new String(receivedRequest.getData()));
                     System.out.println("Packet:" + receivedRequest);
@@ -32,10 +38,10 @@ public class UDPServer
     }
 
 
-    private static boolean requestIsValid (DatagramPacket packet)
+    private static boolean requestIsValid (String[] dividedMessage)
     {
-        String[] dividedMessage = packet.getData().toString().split("¤");
-
-        return Integer.toString(dividedMessage[0].hashCode()).equals(dividedMessage[1]);
+        int dividedMessageCode = Integer.parseInt(dividedMessage[1]);
+        return dividedMessage[0].hashCode() == dividedMessageCode
+                    && dividedMessageCode != messageHashCode;
     }
 }
