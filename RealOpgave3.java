@@ -8,7 +8,8 @@ import java.util.concurrent.*;
  */
 public class RealOpgave3 {
 
-    public boolean go;
+    public boolean waitingForMessages;
+    public ArrayList<String> StorageMessages = new ArrayList();
 
     public static void main(String args[])
     {
@@ -16,7 +17,7 @@ public class RealOpgave3 {
 
     }
 
-    public RealOpgave3(int DatagramSize, int NumberOfDatagrams, int IntervalDatagram )
+    public RealOpgave3(int DatagramSize, int NumberOfDatagrams, int IntervalBetweenTransmissions )
     {
         ExecutorService service = Executors.newSingleThreadExecutor();
         try
@@ -33,41 +34,41 @@ public class RealOpgave3 {
                         byte[] buffer = new byte[1000];
 
                         //Starts the sender.
-                        SenderTread sender = new SenderTread(socket,DatagramSize,NumberOfDatagrams,IntervalDatagram);
+                        SenderTread sender = new SenderTread(socket,DatagramSize,NumberOfDatagrams,IntervalBetweenTransmissions);
                         Thread senderThread = new Thread(sender);
                         senderThread.start();
 
-                        go = true;
-                        while(go)
+                        waitingForMessages = true;
+                        while(waitingForMessages)
                         {
                             DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
                             socket.receive(reply);
                             String message = new String(reply.getData());
+                            StorageMessages.add(message);
                             System.out.println(message);
                         }
-
-
+                        System.out.println("DOES´NT REACH HERE.");
+                        senderThread.interrupt(); // Stop the thread
                     }
-                    //catch (Stop when there has gone 5 seconds, without an response){senderThread.interrupt();}
                     catch (SocketException e){System.out.println("Socket: " + e.getMessage());}
                     catch (IOException e) {System.out.println("IO: " + e.getMessage());}
                     finally {if(socket != null) socket.close();
                     }
                 }
             };
+
+            //Call TimeOutException when throw
             Future<?> f = service.submit(r);
-            f.get(4, TimeUnit.SECONDS);
+            f.get(4+(NumberOfDatagrams-1*IntervalBetweenTransmissions), TimeUnit.SECONDS);
 
         }catch (TimeoutException e){
-            e.printStackTrace();
-            go = false;
+            System.out.println("Time to calculate");
+            waitingForMessages = false;
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-
     }
 
     public class SenderTread implements Runnable
@@ -78,7 +79,6 @@ public class RealOpgave3 {
         int number;
         ArrayList<String> messages;
         DatagramSocket _socket;
-
 
         public  SenderTread(DatagramSocket socket, int DatagramSize, int NumberOfDatagrams, int IntervalDatagram)
         {
