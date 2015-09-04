@@ -7,7 +7,7 @@ public class UDPClient
 
 	private String[] packet;
 
-    public void main(String args[])
+    public static void main(String args[])
 	{
 		UDPClient client = new UDPClient();
 			}
@@ -16,6 +16,9 @@ public class UDPClient
 		initialize();
 	}
 
+	/**
+	 * Initialize the system
+	 */
 	private void initialize(){
 		try
 		{
@@ -55,7 +58,6 @@ public class UDPClient
 			String input = scanner.nextLine();
 			String[] packetData = input.split("\\|");
 
-
 			if (isUserInputValid(packetData))
 			{
 				for (int i = 2; i < packetData.length; i++)
@@ -78,27 +80,37 @@ public class UDPClient
 	 */
 	private boolean isUserInputValid(String[] packetData){
 		String address = packetData[0];
-		String port = packetData[1];
+		int port = Integer.parseInt(packetData[1]);
 
-		int addressPeriodsCount = address.length() - address.replace(".", "").length();
-		int portLength = port.length();
+		int addressPeriodsCount = address.length() - address.replace(".", "").length();;
 
-		return (addressPeriodsCount == 3 ||addressPeriodsCount == 2 ) && (portLength > 0 || portLength <= 5);
+		if (packetData.length < 3)
+		{
+			return false;
+		}
+		else if(address.equals("localhost"))
+		{
+			return port > 0 || port <= 65535;
+		}
+		else
+		{
+			return (addressPeriodsCount == 3 ||addressPeriodsCount == 2 ) && (port > 0 || port <= 65535);
+		}
 	}
 
 
 	/**
-	 *
+	 * Sending specified messages from user input
 	 * @param inputData
 	 */
 	private void send(String[] inputData){
 		DatagramSocket aSocket = null;
 		String address = inputData[0];
-		int port = Integer.getInteger(inputData[1]);
+		int port = Integer.parseInt(inputData[1]);
 		int tryCount = 3;
 
 		for(int i = 2; i < inputData.length ; i++) {
-			System.out.println("Sending message "+ i+"..." );
+			System.out.println("Sending message "+ (i-1)+"..." );
 
 			String message = inputData[i];
 			try
@@ -114,8 +126,7 @@ public class UDPClient
 
 				//Check if server has received datagram
 				System.out.println("Waiting for host...");
-				byte[] buffer = new byte[1000];
-				DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+
 				boolean packetOK = false;
 
 				//Checking until timeout
@@ -156,21 +167,46 @@ public class UDPClient
 			}
 
 			//Resetting client
+			System.out.println("\n");
 			initialize();
 
 		}
 	}
 
+	/**
+	 * Checking if host has received sent message and also if it was non-corrupt when it arrived
+	 * @param aSocket
+	 * @param reply
+	 * @return
+	 * @throws IOException
+	 */
 	private boolean checkReceive(DatagramSocket aSocket, DatagramPacket reply) throws IOException {
-		aSocket.receive(reply);
+
+
+		Thread thread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				DatagramSocket aSocket = null;
+				try {
+					aSocket = new DatagramSocket();
+					byte[] buffer = new byte[1000];
+					DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+					aSocket.receive(reply);
+
+				} catch (SocketException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+			}
+		});
 
 		if(reply.getAddress() == null) return false;
 
-		int validationNumber = Integer.getInteger(new String(reply.getData()));
+		int validationNumber = Integer.parseInt(new String(reply.getData()));
 		if(validationNumber == 0) System.out.println("Sent message was corrupt.");
 		return validationNumber == 1;
-
-
 	}
 
 }
