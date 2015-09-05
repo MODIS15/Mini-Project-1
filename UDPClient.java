@@ -110,7 +110,7 @@ public class UDPClient
         int messageCount= inputData.length-2;
 
 		for(int i = 2; i < inputData.length ; i++) {
-			System.out.println("Sending message "+ (i-1)+"..." );
+			System.out.println("\nSending message "+ (i-1)+"." );
 
 			String message = inputData[i];
 			try
@@ -139,20 +139,20 @@ public class UDPClient
 					tryCount--;
 				}
 
-				else if (!packetOK && tryCount > 0)
+				else if (!packetOK && tryCount == 0)
 				{
-					if(inputData.length < 4) {
+					if(inputData.length < 3) {
                         messageCount--;
                         System.out.println("Message could not be sent.");
                     }
-					else{
+					else if (i < inputData.length) {
                         messageCount--;
                         tryCount = 3;
-                        System.out.println("Message could not be sent. Skipping to next message.");
+                        System.out.println("\nMessage " + (i - 1) + " could not be sent. Skipping to next message.");
                     }
 				}
 
-				else System.out.println("Success.");
+				else if(packetOK) System.out.println("Success.");
 
 
 			} catch (SocketException e) {
@@ -165,10 +165,11 @@ public class UDPClient
 
 		}
         //Resetting client
-        if(messageCount == inputData.length-2) {
-            System.out.println("Some messages could not be sent...");
+        if(messageCount < inputData.length-2) {
+            System.out.println("\nSome messages could not be sent.");
         }
 
+        System.out.println("\n---Resetting client...");
         System.out.println("\n");
         initialize();
 	}
@@ -199,7 +200,7 @@ public class UDPClient
 
 
 				} catch (SocketTimeoutException e) {
-                    System.out.println("Timeout... Trying again.");
+                    System.out.println("Timeout.");
                     return false;
                 } catch (IOException e) {
 					e.printStackTrace();
