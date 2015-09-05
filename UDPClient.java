@@ -6,7 +6,6 @@ public class UDPClient
 {
 
 	private String[] packet;
-
     public static void main(String args[])
 	{
 		UDPClient client = new UDPClient();
@@ -20,7 +19,7 @@ public class UDPClient
 	 * Initialize the system
 	 */
 	private void initialize(){
-		try
+      	try
 		{
 			packet = setPacket();
 			if (packet != null)
@@ -48,7 +47,7 @@ public class UDPClient
 	 */
 	private String[] setPacket() throws Exception, IllegalAccessException {
 
-		System.out.println("Please specify reciever address, port and message. Seperate the input with |  " +
+		System.out.println("Please specify receiver address, port and message. Separate the input with |  " +
 				"\n Eg: 192.0.0.1|8080|message1|message2 " +
 				"\n To use default values just press enter without any input. ");
 
@@ -63,7 +62,7 @@ public class UDPClient
 				for (int i = 2; i < packetData.length; i++)
 				{
 					String tempMessage = packetData[i];
-					String messageWithHashCode = new String(tempMessage + "¤" + tempMessage.hashCode());
+					String messageWithHashCode = new String(tempMessage + "ï¿½" + tempMessage.hashCode());
 					packetData[i] = messageWithHashCode;
 				}
 				return packetData;
@@ -108,6 +107,7 @@ public class UDPClient
 		String address = inputData[0];
 		int port = Integer.parseInt(inputData[1]);
 		int tryCount = 3;
+        int messageCount= inputData.length-2;
 
 		for(int i = 2; i < inputData.length ; i++) {
 			System.out.println("Sending message "+ (i-1)+"..." );
@@ -127,32 +127,29 @@ public class UDPClient
 				//Check if server has received datagram
 				System.out.println("Waiting for host...");
 
-				boolean packetOK = false;
 
-				//Checking until timeout
-				long endTimeMillis = System.currentTimeMillis() + 5000; //Timeout after 5 seconds
-				while (System.currentTimeMillis() < endTimeMillis){
-					if(checkReceive(aSocket,reply))
-					{
-						packetOK = true;
-						break;
-					}
-				}
 
-				//Resending or skipping message after a number of tries
+				//Checking sent packet
+                boolean packetOK = false;
+                if(checkReceive()) packetOK  = true;
+
 				if(!packetOK && tryCount > 0)
 				{
-					System.out.println("Timeout... Trying again.");
 					i--;
 					tryCount--;
 				}
 
-				else if (!packetOK && tryCount >= 0)
+				else if (!packetOK && tryCount > 0)
 				{
-					if(inputData.length < 4)
-						System.out.println("Message could not be sendt.");
-					else
-						System.out.println("Message could not be sendt. Skipping to next message.");
+					if(inputData.length < 4) {
+                        messageCount--;
+                        System.out.println("Message could not be sent.");
+                    }
+					else{
+                        messageCount--;
+                        tryCount = 3;
+                        System.out.println("Message could not be sent. Skipping to next message.");
+                    }
 				}
 
 				else System.out.println("Success.");
@@ -166,47 +163,47 @@ public class UDPClient
 				if (aSocket != null) aSocket.close();
 			}
 
-			//Resetting client
-			System.out.println("\n");
-			initialize();
-
 		}
+        //Resetting client
+        if(messageCount == inputData.length-2) {
+            System.out.println("Some messages could not be sent...");
+        }
+
+        System.out.println("\n");
+        initialize();
 	}
 
 	/**
 	 * Checking if host has received sent message and also if it was non-corrupt when it arrived
-	 * @param aSocket
-	 * @param reply
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean checkReceive(DatagramSocket aSocket, DatagramPacket reply) throws IOException {
+	private boolean checkReceive() throws IOException {
 
 
-		Thread thread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				DatagramSocket aSocket = null;
+				DatagramSocket aSocket;
+                byte[] buffer = new byte[1000];
+                DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
 				try {
-					aSocket = new DatagramSocket();
-					byte[] buffer = new byte[1000];
-					DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-					aSocket.receive(reply);
+                    aSocket = new DatagramSocket();
+                    aSocket.setSoTimeout(5000); // Timeout after 5 seconds
+                    aSocket.receive(reply);
 
-				} catch (SocketException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
+                    if(reply.getAddress() == null) return false;
+                    int validationNumber = Integer.parseInt(new String(reply.getData()));
+                    if(validationNumber == 0) System.out.println("Sent message was corrupt.");
+
+                    //Packed was successfully sent if host returned 1
+                    return validationNumber == 1;
+
+
+
+				} catch (SocketTimeoutException e) {
+                    System.out.println("Timeout... Trying again.");
+                    return false;
+                } catch (IOException e) {
 					e.printStackTrace();
 				}
-
-			}
-		});
-
-		if(reply.getAddress() == null) return false;
-
-		int validationNumber = Integer.parseInt(new String(reply.getData()));
-		if(validationNumber == 0) System.out.println("Sent message was corrupt.");
-		return validationNumber == 1;
-	}
-
-}
+        return false;
+    }
+ }
