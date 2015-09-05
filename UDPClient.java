@@ -49,7 +49,7 @@ public class UDPClient
 
 		System.out.println("Please specify receiver address, port and message. Separate the input with |  " +
 				"\n Eg: 192.0.0.1|8080|message1|message2 " +
-				"\n To use default values just press enter without any input. ");
+				"\n Waiting for user input:");
 
 		Scanner scanner = new Scanner(System.in);
 		if (scanner.hasNext())
