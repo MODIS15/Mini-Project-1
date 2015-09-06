@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
 
+/**
+ * This class creates a UDPClient sending user input from the terminal to a UDPServer with an agreed port.
+ */
 public class UDPClient
 {
 
@@ -47,12 +50,11 @@ public class UDPClient
 			initialize();
 		}
 
-
 	}
 
 	/**
-	 * Get user input and create a packet with host address, port, messages and hashcodes
-	 * @return array with messages
+	 * Create a packet with host address, port and message (with hashcode) from user input.
+	 * @return array with packet message.
 	 */
 	private String[] setPacket() throws IllegalAccessException
 	{
@@ -83,9 +85,9 @@ public class UDPClient
 	}
 
 	/**
-	 * Check if  user entered address and port is valid.
-	 * @param packetData
-	 * @return a boolean regarding port and address is valid
+	 * Checks if address and port input is valid.
+	 * @param packetData - array with address, port and message.
+	 * @return true if address and port is valid.
 	 */
 	private boolean isUserInputValid(String[] packetData)
 	{
@@ -110,8 +112,8 @@ public class UDPClient
 	}
 
 	/**
-	 * Send packet to host
-	 * @param inputData
+	 * Sends packet to host server.
+	 * @param inputData including address, port and message.
 	 */
 	private void send(String[] inputData)
 	{
@@ -218,9 +220,6 @@ public class UDPClient
 
 			//Packed was successfully sent if host returned 1
 			return validationNumber == 1;
-
-
-
 		}
 		catch (SocketTimeoutException e)
 		{
@@ -232,7 +231,6 @@ public class UDPClient
 			e.printStackTrace();
 		}
 		return false;
-
 	}
 
 }
