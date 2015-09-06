@@ -1,3 +1,4 @@
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
@@ -63,7 +64,7 @@ public class UDPClient
 				for (int i = 2; i < packetData.length; i++)
 				{
 					String tempMessage = packetData[i];
-					String messageWithHashCode = new String(tempMessage + "¤" + tempMessage.hashCode());
+					String messageWithHashCode = new String(tempMessage + "¤" + tempMessage.hashCode()+"¤");
 					packetData[i] = messageWithHashCode;
 				}
 				return packetData;
@@ -133,7 +134,7 @@ public class UDPClient
 
 				//Checking sent packet
                 boolean packetOK = false;
-                if(checkReceive()) packetOK  = true;
+                if(checkReceive(aSocket)) packetOK  = true;
 
 				if(!packetOK && tryCount > 0)
 				{
@@ -181,14 +182,12 @@ public class UDPClient
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean checkReceive() throws IOException {
+	private boolean checkReceive(DatagramSocket aSocket) throws IOException {
 
 
-				DatagramSocket aSocket;
                 byte[] buffer = new byte[1000];
                 DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
 				try {
-                    aSocket = new DatagramSocket();
                     aSocket.setSoTimeout(5000); // Timeout after 5 seconds
                     aSocket.receive(reply);
 
