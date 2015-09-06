@@ -78,6 +78,7 @@ public class UDPClient
 	 * @return a boolean regarding port and address is valid
 	 */
 	private boolean isUserInputValid(String[] packetData){
+		if(packetData.length < 3 ) return false;
 		String address = packetData[0];
 		int port = Integer.parseInt(packetData[1]);
 
