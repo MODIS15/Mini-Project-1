@@ -26,5 +26,7 @@ public class UDPClient
 		catch (SocketException e) {System.out.println("Socket: " + e.getMessage());}
 		catch (IOException e){System.out.println("IO: " + e.getMessage());}
 		finally { if(aSocket != null) aSocket.close(); }
-	}		      	
+	}
+
+
 }
