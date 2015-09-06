@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.concurrent.*;
 
 /**
  * Created by rcechab12 on 04-09-2015.
@@ -10,23 +9,18 @@ public class RealOpgave3 {
 
     public boolean waitingForMessages;
     public ArrayList<String> StorageMessages = new ArrayList();
+    public SenderTread sender;
+    public Thread senderThread;
 
     public static void main(String args[])
     {
-        RealOpgave3 ro3 = new RealOpgave3(10,10,1);
-
+        RealOpgave3 ro3 = new RealOpgave3(10,3,1);
     }
 
     public RealOpgave3(int DatagramSize, int NumberOfDatagrams, int IntervalBetweenTransmissions )
     {
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        try
-        {
-            Runnable r = new Runnable() {
-                @Override
-                public void run()
-                {
                     DatagramSocket socket = null; //Reciever setup
+                    waitingForMessages = true;
                     try
                     {
                         socket = new DatagramSocket(7007);
@@ -34,11 +28,11 @@ public class RealOpgave3 {
                         byte[] buffer = new byte[1000];
 
                         //Starts the sender.
-                        SenderTread sender = new SenderTread(socket,DatagramSize,NumberOfDatagrams,IntervalBetweenTransmissions);
-                        Thread senderThread = new Thread(sender);
+                        sender = new SenderTread(socket,DatagramSize,NumberOfDatagrams,IntervalBetweenTransmissions);
+                        senderThread = new Thread(sender);
                         senderThread.start();
 
-                        waitingForMessages = true;
+
                         while(waitingForMessages)
                         {
                             DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
@@ -47,28 +41,16 @@ public class RealOpgave3 {
                             StorageMessages.add(message);
                             System.out.println(message);
                         }
-                        System.out.println("DOES´NT REACH HERE.");
-                        senderThread.interrupt(); // Stop the thread
+                        senderThread.stop();
                     }
                     catch (SocketException e){System.out.println("Socket: " + e.getMessage());}
                     catch (IOException e) {System.out.println("IO: " + e.getMessage());}
                     finally {if(socket != null) socket.close();
                     }
-                }
-            };
 
-            //Call TimeOutException when throw
-            Future<?> f = service.submit(r);
-            f.get(4+(NumberOfDatagrams-1*IntervalBetweenTransmissions), TimeUnit.SECONDS);
 
-        }catch (TimeoutException e){
-            System.out.println("Time to calculate");
-            waitingForMessages = false;
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        System.out.println("STOP!!!");
+
     }
 
     public class SenderTread implements Runnable
@@ -102,11 +84,11 @@ public class RealOpgave3 {
             try {Thread.sleep(_timeOut*1000);}
             catch (InterruptedException e) {e.printStackTrace();}
 
-            for (int i = 0; i<number; i++) {
+            for (int i = 0; i<number; i++)
+            {
 
                 message = messages.get(i).getBytes();
                 _message = messages.get(i);
-
 
                 try {
                     InetAddress host = InetAddress.getByName(IPDestination);
@@ -129,11 +111,9 @@ public class RealOpgave3 {
                     e.printStackTrace();
                 }
             }
+            System.out.println("Done sending");
+            waitingForMessages = false;
 
         }
     }
-
-
-
-
 }
