@@ -15,7 +15,7 @@ public class UDPClient
 	}
 
 
-	private UDPClient()
+	public UDPClient()
 	{
 		initialize();
 	}
