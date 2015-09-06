@@ -1,35 +1,38 @@
 import java.net.*;
 import java.io.*;
+import java.util.HashMap;
+
 public class UDPServer
 {
-    private static int messageHashCode;
     private static String[] dividedMessage;
     private static DatagramPacket request;
     private static DatagramSocket aSocket = null;
-    private static DatagramPacket handledRequest;
+    private static HashMap<InetAddress, Integer> IPMessageMap;
 
 
-    public static void main(String args)
+    public static void main(String[] args)
 	{
         try
         {
+            IPMessageMap = new HashMap<>();
             aSocket = new DatagramSocket(7007);
             // create socket at agreed port
             byte[] buffer = new byte[1000];
+            System.out.println("Server process started...");
             while(true)
             {
                 request = new DatagramPacket(buffer, buffer.length);
                 aSocket.receive(request);
-                handledRequest = new DatagramPacket(request.getData(), request.getLength(),
-                        request.getAddress(), request.getPort());
-                dividedMessage = handledRequest.getData().toString().split("¤");
+                dividedMessage = new String(request.getData()).split("¤");
 
                 if (requestIsValid()) {
-                    messageHashCode = Integer.parseInt(dividedMessage[1]);
                     handleValidMessage();
                 }
-                else
-                    aSocket.send(new DatagramPacket(new byte[]{0}, 1, request.getAddress(), request.getPort()));
+                else {
+                    String failedMessage = "0";
+                    aSocket.send(new DatagramPacket(failedMessage.getBytes(), failedMessage.length(),
+                            request.getAddress(), request.getPort()));
+                }
             }
         }
         catch (SocketException e){System.out.println("Socket: " + e.getMessage()); }
@@ -40,18 +43,24 @@ public class UDPServer
 
     private static boolean requestIsValid ()
     {
-        int dividedMessageCode = Integer.parseInt(dividedMessage[1]);
-        return dividedMessage[0].hashCode() == dividedMessageCode
-                    && dividedMessageCode != messageHashCode;
+        if(IPMessageMap.get(request.getAddress()) != null)
+            return dividedMessage[0].hashCode() == Integer.parseInt(dividedMessage[1])
+                    && IPMessageMap.get(request.getAddress()) != request.hashCode();
+        else
+            return dividedMessage[0].hashCode() == Integer.parseInt(dividedMessage[1]);
     }
 
     private static void handleValidMessage()
     {
         try {
-            System.out.println("UDP packet from: " + new String(request.getAddress().toString()));
-            System.out.println("Message: " + new String(handledRequest.getData()));
-            System.out.println("Packet:" + handledRequest);
-            aSocket.send(new DatagramPacket(new byte[]{1}, 1, request.getAddress(), request.getPort()));
+            IPMessageMap.put(request.getAddress(), request.hashCode());
+            System.out.println("UDP packet from: (Anonymous)" + new String(request.getAddress().toString()));
+            System.out.println("Port:" + new String(String.valueOf(request.getPort())).toString());
+            System.out.println("Message: " + new String(dividedMessage[0]));
+            System.out.println("Packet:" + request);
+            String approvedMessage = "1";
+            aSocket.send(new DatagramPacket(approvedMessage.getBytes(), approvedMessage.length(),
+                            request.getAddress(), request.getPort()));
         }
         catch(IOException e)
         {
