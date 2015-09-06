@@ -6,6 +6,8 @@ public class UDPClient
 {
 
 	private static final int BUFFER_SIZE = 1000;
+	private static final int TIMEOUT_SIZE = 5000;
+	private static final int MAX_SIZE = 255; // chars
 
 	public static void main(String args[])
 	{
@@ -25,7 +27,7 @@ public class UDPClient
 		try
 		{
 			String[] packet = setPacket();
-			if (packet != null)
+			if (packet != null && packet[2].toCharArray().length <= MAX_SIZE) // Check content and message size
 			{
 				send(packet);
 			}
@@ -107,7 +109,6 @@ public class UDPClient
 		}
 	}
 
-
 	/**
 	 * Send packet to host
 	 * @param inputData
@@ -118,13 +119,14 @@ public class UDPClient
 		String address = inputData[0];
 		int port = Integer.parseInt(inputData[1]);
 		int tryCount = 3;
-		int messageCount= inputData.length-2;
+		int messageCount = inputData.length-2;
 
 		for(int i = 2; i < inputData.length ; i++)
 		{
-			System.out.println("\nSending message "+ (i-1)+"." );
+			System.out.println("\nSending message " + (i-1) + "." );
 
 			String message = inputData[i];
+
 			try
 			{
 				aSocket = new DatagramSocket();
@@ -206,7 +208,7 @@ public class UDPClient
 		DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
 		try
 		{
-			aSocket.setSoTimeout(5000); // Timeout after 5 seconds
+			aSocket.setSoTimeout(TIMEOUT_SIZE); // Timeout after 5 seconds
 			aSocket.receive(reply);
 
 			if(reply.getAddress() == null) return false;
