@@ -17,6 +17,8 @@ public class RealOpgave3 {
         RealOpgave3 ro3 = new RealOpgave3(10,3,1);
     }
 
+    public boolean getMessage(){return waitingForMessages;}
+
     public RealOpgave3(int DatagramSize, int NumberOfDatagrams, int IntervalBetweenTransmissions )
     {
                     DatagramSocket socket = null; //Reciever setup
@@ -32,7 +34,6 @@ public class RealOpgave3 {
                         senderThread = new Thread(sender);
                         senderThread.start();
 
-
                         while(waitingForMessages)
                         {
                             DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
@@ -40,13 +41,12 @@ public class RealOpgave3 {
                             String message = new String(reply.getData());
                             StorageMessages.add(message);
                             System.out.println(message);
+                            System.out.println("fdfd");
                         }
-                        senderThread.stop();
                     }
                     catch (SocketException e){System.out.println("Socket: " + e.getMessage());}
                     catch (IOException e) {System.out.println("IO: " + e.getMessage());}
-                    finally {if(socket != null) socket.close();
-                    }
+                    finally {if(socket != null) socket.close();}
 
 
         System.out.println("STOP!!!");
@@ -105,14 +105,15 @@ public class RealOpgave3 {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                try {
-                    Thread.sleep(_timeOut);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
-            System.out.println("Done sending");
-            waitingForMessages = false;
+            try {
+                Thread.sleep(_timeOut*1000);
+                System.out.println("Done sending");
+                waitingForMessages = false;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
 
         }
     }
