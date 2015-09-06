@@ -8,6 +8,8 @@ import java.util.Scanner;
 public class UDPClient
 {
 
+	private int tryCount, messageCount;
+	private DatagramSocket aSocket;
 	private static final int BUFFER_SIZE = 1000;
 	private static final int TIMEOUT_SIZE = 5000;
 	private static final int MAX_SIZE = 255; // chars
@@ -26,7 +28,8 @@ public class UDPClient
 	/**
 	 * Initialize the system
 	 */
-	private void initialize(){
+	private void initialize()
+	{
 		try
 		{
 			String[] packet = setPacket();
@@ -36,7 +39,7 @@ public class UDPClient
 			}
 			else
 			{
-				System.out.println("Something went wrong...");
+				System.out.println("Message is empty or too long...");
 				System.out.println("\n---Resetting client...");
 				initialize();
 			}
@@ -117,83 +120,31 @@ public class UDPClient
 	 */
 	private void send(String[] inputData)
 	{
-		DatagramSocket aSocket = null;
 		String address = inputData[0];
 		int port = Integer.parseInt(inputData[1]);
-		int tryCount = 3;
+		tryCount = 3;
 		int messageCount = inputData.length-2;
 
 		for(int i = 2; i < inputData.length ; i++)
 		{
 			System.out.println("\nSending message " + (i-1) + "." );
-
 			String message = inputData[i];
 
-			try
+			Thread thread = new Thread(new Runnable()
 			{
-				aSocket = new DatagramSocket();
-				byte[] m = message.getBytes();
-				InetAddress aHost = InetAddress.getByName(address);
-				DatagramPacket request = new DatagramPacket(m, message.length(), aHost, port);
-
-
-				aSocket.send(request);
-
-
-				//Check if server has received datagram
-				System.out.println("Waiting for host...");
-
-
-
-				//Checking sent packet
-				boolean packetOK = false;
-				if(checkReceive(aSocket)) packetOK  = true;
-
-				if(!packetOK && tryCount > 0)
+				@Override
+				public void run()
 				{
-					i--;
-					tryCount--;
+					sendMessage(inputData, message, address, port);
 				}
-
-				else if (!packetOK && tryCount == 0)
-				{
-					if(inputData.length < 3)
-					{
-						messageCount--;
-						System.out.println("Message could not be sent.");
-					}
-					else if (i < inputData.length)
-					{
-						messageCount--;
-						tryCount = 3;
-						System.out.println("\nMessage " + (i - 1) + " could not be sent. Skipping to next message.");
-					}
-				}
-
-				else if(packetOK) System.out.println("Success.");
-
-
-			}
-			catch (SocketException e)
-			{
-				System.out.println("Socket: " + e.getMessage());
-			}
-			catch (IOException e)
-			{
-				System.out.println("IO: " + e.getMessage());
-			}
-			finally
-			{
-				if (aSocket != null) aSocket.close();
-			}
-
+			});
 		}
-		// Resetting client
+
+		// Reset client
 		if(messageCount < inputData.length-2)
 		{
 			System.out.println("\nSome messages could not be sent.");
 		}
-
 		System.out.println("\n---Resetting client...");
 		System.out.println("\n");
 		initialize();
@@ -201,10 +152,10 @@ public class UDPClient
 
 	/**
 	 * Checking if host has received sent message and also if it was non-corrupt when it arrived
-	 * @return
+	 * @return true if valid message was received
 	 * @throws IOException
 	 */
-	private boolean checkReceive(DatagramSocket aSocket) throws IOException
+	private boolean isReceived(DatagramSocket aSocket) throws IOException
 	{
 		byte[] buffer = new byte[BUFFER_SIZE];
 		DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
@@ -231,6 +182,66 @@ public class UDPClient
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	public void checkPacket(String[] inputData) throws IOException
+	{
+		//Checking sent packet
+		boolean packetOK = false;
+
+		if(isReceived(aSocket)) packetOK  = true;
+
+		if(!packetOK && tryCount > 0)
+		{
+			//i--;
+			tryCount--;
+		}
+
+		else if (!packetOK && tryCount == 0)
+		{
+			if(inputData.length < 3)
+			{
+				messageCount--;
+				System.out.println("Message could not be sent.");
+			}
+			/*
+			else if (i < inputData.length)
+
+			{
+				messageCount--;
+				tryCount = 3;
+				System.out.println("\nMessage " + (i - 1) + " could not be sent. Skipping to next message.");
+			}
+			*/
+		}
+
+		else if(packetOK) System.out.println("Success.");
+	}
+
+	/**
+	 * Sends messa
+	 * @param inputData
+	 * @param address
+	 * @param port
+	 */
+	public void sendMessage(String[] inputData, String message, String address, int port)
+	{
+		System.out.println("Runnable running");
+		try
+		{
+			aSocket = new DatagramSocket();
+			byte[] m = inputData.toString().getBytes();
+			InetAddress aHost = InetAddress.getByName(address);
+			DatagramPacket request = new DatagramPacket(m, message.length(), aHost, port);
+			aSocket.send(request);
+			//Check if server has received datagram
+			System.out.println("Waiting for host...");
+			checkPacket(inputData);
+		}
+		catch (SocketException e) { System.out.println("Socket: " + e.getMessage()); }
+		catch (IOException e) { System.out.println("IO: " + e.getMessage()); }
+		finally { if (aSocket != null) aSocket.close(); }
+
 	}
 
 }
