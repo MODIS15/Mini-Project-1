@@ -1,86 +1,71 @@
-import javax.xml.crypto.Data;
 import java.net.*;
 import java.io.*;
-public class UDPServer implements Runnable
+import java.util.HashMap;
+
+public class UDPServer
 {
+	private static String[] dividedMessage;
+	private static DatagramPacket request;
+	private static DatagramSocket aSocket = null;
+	private static HashMap<InetAddress, Integer> IPMessageMap;
 
-	private DatagramSocket socket;
-	private DatagramPacket request;
-	private byte[] buffer;
 
-	public void UDPServer() throws SocketException
+	public static void main(String[] args)
 	{
-		socket = new DatagramSocket(7007);
-		buffer = new byte[1000];
-		request = new DatagramPacket(buffer, buffer.length);
-	}
-
-    public static void main(String args[])
-	{
-    	DatagramSocket aSocket = null;
 		try
 		{
-	    	aSocket = new DatagramSocket(7007);
-					// create socket at agreed port
+			IPMessageMap = new HashMap<>();
+			aSocket = new DatagramSocket(7007);
+			// create socket at agreed port
 			byte[] buffer = new byte[1000];
- 			while(true)
+			System.out.println("Server process started...");
+			while(true)
 			{
- 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
-  				aSocket.receive(request);     
-    			DatagramPacket reply = new DatagramPacket(request.getData(), request.getLength(), 
-    				request.getAddress(), request.getPort());
-                System.out.println("UDP packet from: " + new String(request.getAddress().toString()));
-                System.out.println("Message: " + new String(reply.getData()));
-                System.out.println("Packet:" + reply);	
-    			aSocket.send(reply);
-    		}
+				request = new DatagramPacket(buffer, buffer.length);
+				aSocket.receive(request);
+				dividedMessage = new String(request.getData()).split("�");
+
+				if (requestIsValid()) {
+					handleValidMessage();
+				}
+				else {
+					String failedMessage = "0";
+					aSocket.send(new DatagramPacket(failedMessage.getBytes(), failedMessage.length(),
+							request.getAddress(), request.getPort()));
+				}
+			}
 		}
 		catch (SocketException e){System.out.println("Socket: " + e.getMessage()); }
-		catch (IOException e) {System.out.println("IO: " + e.getMessage()); }
+		catch (IOException e) {System.out.println("IO: " + e.getMessage());}
 		finally {if(aSocket != null) aSocket.close();}
-    }
+	}
 
-	public void run()
+
+	private static boolean requestIsValid ()
 	{
-		while(true)
+		if(IPMessageMap.get(request.getAddress()) != null)
+			return dividedMessage[0].hashCode() == Integer.parseInt(dividedMessage[1])
+					&& IPMessageMap.get(request.getAddress()) != request.hashCode();
+		else
+			return dividedMessage[0].hashCode() == Integer.parseInt(dividedMessage[1]);
+	}
+
+	private static void handleValidMessage()
+	{
+		try {
+			IPMessageMap.put(request.getAddress(), request.hashCode());
+			System.out.println("UDP packet from: (Anonymous)" + new String(request.getAddress().toString()));
+			System.out.println("Port:" + new String(String.valueOf(request.getPort())).toString());
+			System.out.println("Message: " + new String(dividedMessage[0]));
+			System.out.println("Packet:" + request);
+			String approvedMessage = "1";
+			aSocket.send(new DatagramPacket(approvedMessage.getBytes(), approvedMessage.length(),
+					request.getAddress(), request.getPort()));
+		}
+		catch(IOException e)
 		{
-
-			socket = new DatagramSocket(7007);
-			DatagramPacket packet = socket.receive(request);
-			new Thread(new Responder(socket, packet)).start();
+			e.printStackTrace();
+			System.out.println("");
 		}
 	}
-
-	public byte[] makeResponse(String input)
-	{
-		return input.getBytes();
-	}
-
-	public class Responder implements Runnable {
-
-		private DatagramSocket socket = null;
-		private DatagramPacket packet = null;
-
-		public Responder(DatagramSocket socket, DatagramPacket packet) {
-			this.socket = socket;
-			this.packet = packet;
-		}
-
-		public void run() {
-			byte[] data = makeResponse(); // code not shown
-			DatagramPacket response = new DatagramPacket(data, data.length,
-					packet.getAddress(), packet.getPort());
-			try
-			{
-				socket.send(response);
-			}
-			catch(IOException e)
-			{
-				e.printStackTrace();
-				System.out.println("Unable to send response");
-			}
-
-		}
-	}
-
 }
