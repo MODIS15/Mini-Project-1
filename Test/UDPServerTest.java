@@ -7,6 +7,6 @@ public class UDPServerTest {
 
     @org.junit.Test
     public void testMain() throws Exception {
-
+        UDPServer.main("");
     }
 }
