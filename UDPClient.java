@@ -1,4 +1,3 @@
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
@@ -31,12 +30,16 @@ public class UDPClient
 			else
 			{
 				System.out.println("Something went wrong...");
+				System.out.println("\n---Resetting client...");
 				initialize();
 			}
 		}
 		catch (Exception e)
 		{
 			System.out.println(e.getMessage());
+			System.out.println("Something went wrong...");
+			System.out.println("\n---Resetting client...");
+
 			initialize();
 		}
 
@@ -44,7 +47,7 @@ public class UDPClient
 	}
 
 	/**
-	 * Get user input, and create a packet with message and hashcode
+	 * Get user input and create a packet with host address, port, messages and hashcodes
 	 * @return array with messages
 	 */
 	private String[] setPacket() throws Exception, IllegalAccessException {
@@ -64,7 +67,7 @@ public class UDPClient
 				for (int i = 2; i < packetData.length; i++)
 				{
 					String tempMessage = packetData[i];
-					String messageWithHashCode = new String(tempMessage + "¤" + tempMessage.hashCode()+"¤");
+					String messageWithHashCode = new String(tempMessage + "¤" + tempMessage.hashCode()+"¤"+(i-2)+"¤");
 					packetData[i] = messageWithHashCode;
 				}
 				return packetData;
@@ -75,7 +78,7 @@ public class UDPClient
 	}
 
 	/**
-	 * Check if address and port is valid
+	 * Check if  user entered address and port is valid.
 	 * @param packetData
 	 * @return a boolean regarding port and address is valid
 	 */
@@ -90,9 +93,9 @@ public class UDPClient
 		{
 			return false;
 		}
-		else if(address.equals("localhost"))
+		else if(address.equals("localhost") && (port > 0 || port <= 65535))
 		{
-			return port > 0 || port <= 65535;
+			return true;
 		}
 		else
 		{
@@ -102,7 +105,7 @@ public class UDPClient
 
 
 	/**
-	 * Sending specified messages from user input
+	 * Send packet to host
 	 * @param inputData
 	 */
 	private void send(String[] inputData){
@@ -123,6 +126,7 @@ public class UDPClient
 				InetAddress aHost = InetAddress.getByName(address);
 				int serverPort = port;
 				DatagramPacket request = new DatagramPacket(m, message.length(), aHost, serverPort);
+
 
 				aSocket.send(request);
 
@@ -192,7 +196,8 @@ public class UDPClient
                     aSocket.receive(reply);
 
                     if(reply.getAddress() == null) return false;
-                    int validationNumber = Integer.parseInt(new String(reply.getData()));
+
+                    int validationNumber = Character.getNumericValue(new String(reply.getData()).charAt(0)); //Get first char and convert to int
                     if(validationNumber == 0) System.out.println("Sent message was corrupt.");
 
                     //Packed was successfully sent if host returned 1
