@@ -5,13 +5,16 @@ import java.util.Scanner;
 public class UDPClient
 {
 
+	private static final int BUFFER_SIZE = 1000;
+
 	public static void main(String args[])
 	{
 		UDPClient client = new UDPClient();
 	}
 
 
-	private UDPClient(){
+	private UDPClient()
+	{
 		initialize();
 	}
 
@@ -49,7 +52,8 @@ public class UDPClient
 	 * Get user input and create a packet with host address, port, messages and hashcodes
 	 * @return array with messages
 	 */
-	private String[] setPacket() throws IllegalAccessException {
+	private String[] setPacket() throws IllegalAccessException
+	{
 
 		System.out.println("Please specify receiver address, port and message. Separate the input with |  " +
 				"\n Eg: 192.0.0.1|8080|message1|message2 " +
@@ -81,7 +85,8 @@ public class UDPClient
 	 * @param packetData
 	 * @return a boolean regarding port and address is valid
 	 */
-	private boolean isUserInputValid(String[] packetData){
+	private boolean isUserInputValid(String[] packetData)
+	{
 		if(packetData.length < 3 ) return false;
 		String address = packetData[0];
 		int port = Integer.parseInt(packetData[1]);
@@ -107,14 +112,16 @@ public class UDPClient
 	 * Send packet to host
 	 * @param inputData
 	 */
-	private void send(String[] inputData){
+	private void send(String[] inputData)
+	{
 		DatagramSocket aSocket = null;
 		String address = inputData[0];
 		int port = Integer.parseInt(inputData[1]);
 		int tryCount = 3;
 		int messageCount= inputData.length-2;
 
-		for(int i = 2; i < inputData.length ; i++) {
+		for(int i = 2; i < inputData.length ; i++)
+		{
 			System.out.println("\nSending message "+ (i-1)+"." );
 
 			String message = inputData[i];
@@ -146,11 +153,13 @@ public class UDPClient
 
 				else if (!packetOK && tryCount == 0)
 				{
-					if(inputData.length < 3) {
+					if(inputData.length < 3)
+					{
 						messageCount--;
 						System.out.println("Message could not be sent.");
 					}
-					else if (i < inputData.length) {
+					else if (i < inputData.length)
+					{
 						messageCount--;
 						tryCount = 3;
 						System.out.println("\nMessage " + (i - 1) + " could not be sent. Skipping to next message.");
@@ -160,17 +169,24 @@ public class UDPClient
 				else if(packetOK) System.out.println("Success.");
 
 
-			} catch (SocketException e) {
+			}
+			catch (SocketException e)
+			{
 				System.out.println("Socket: " + e.getMessage());
-			} catch (IOException e) {
+			}
+			catch (IOException e)
+			{
 				System.out.println("IO: " + e.getMessage());
-			} finally {
+			}
+			finally
+			{
 				if (aSocket != null) aSocket.close();
 			}
 
 		}
-		//Resetting client
-		if(messageCount < inputData.length-2) {
+		// Resetting client
+		if(messageCount < inputData.length-2)
+		{
 			System.out.println("\nSome messages could not be sent.");
 		}
 
@@ -184,10 +200,12 @@ public class UDPClient
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean checkReceive(DatagramSocket aSocket) throws IOException {
-		byte[] buffer = new byte[1000];
+	private boolean checkReceive(DatagramSocket aSocket) throws IOException
+	{
+		byte[] buffer = new byte[BUFFER_SIZE];
 		DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-		try {
+		try
+		{
 			aSocket.setSoTimeout(5000); // Timeout after 5 seconds
 			aSocket.receive(reply);
 
@@ -201,14 +219,18 @@ public class UDPClient
 
 
 
-		} catch (SocketTimeoutException e) {
+		}
+		catch (SocketTimeoutException e)
+		{
 			System.out.println("Timeout.");
 			return false;
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			e.printStackTrace();
 		}
-		catch (SocketException e) {System.out.println("Socket: " + e.getMessage());}
-		catch (IOException e){System.out.println("IO: " + e.getMessage());}
-		finally { if(aSocket != null) aSocket.close(); }
-	}		      	
+		return false;
+
+	}
+
 }

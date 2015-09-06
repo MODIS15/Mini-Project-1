@@ -8,6 +8,7 @@ public class UDPServer
 	private static DatagramPacket request;
 	private static DatagramSocket aSocket = null;
 	private static HashMap<InetAddress, Integer> IPMessageMap;
+	private static final int BUFFER_SIZE = 1000;
 
 
 	public static void main(String[] args)
@@ -17,7 +18,7 @@ public class UDPServer
 			IPMessageMap = new HashMap<>();
 			aSocket = new DatagramSocket(7007);
 			// create socket at agreed port
-			byte[] buffer = new byte[1000];
+			byte[] buffer = new byte[BUFFER_SIZE];
 			System.out.println("Server process started...");
 			while(true)
 			{
@@ -25,10 +26,12 @@ public class UDPServer
 				aSocket.receive(request);
 				dividedMessage = new String(request.getData()).split("�");
 
-				if (requestIsValid()) {
+				if (requestIsValid())
+				{
 					handleValidMessage();
 				}
-				else {
+				else
+				{
 					String failedMessage = "0";
 					aSocket.send(new DatagramPacket(failedMessage.getBytes(), failedMessage.length(),
 							request.getAddress(), request.getPort()));
