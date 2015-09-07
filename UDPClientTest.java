@@ -2,9 +2,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import java.io.InputStream;
-import java.io.ByteArrayInputStream;
-import java.util.Scanner;
 
 /**
  * This test class checks whether the UDPClient only parses messages of 255 chars or less.
@@ -24,10 +21,18 @@ public class UDPClientTest
         PORT = "7007";
         ADDRESS = "localhost";
         MAX_SIZE = 255;
-        invalidString = new String(new char[256]);
         validString = new String(new char[255]);
-        //UDPServer server = new UDPServer();
-        //UDPClient client = new UDPClient();
+        invalidString = new String(new char[256]);
+
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //Set up new server on another thread
+            }
+        });
+
+
     }
 
     @After
@@ -37,7 +42,7 @@ public class UDPClientTest
     }
 
     @Test
-    public void testValidMessage()
+    public void testValidPacket_NO_CLIENT_SERVER_SETUP()
     {
         String input = ADDRESS + "|" + PORT + "|" + validString;
         String[] packet = input.split("\\|");
@@ -45,50 +50,32 @@ public class UDPClientTest
     }
 
     @Test
-    public void testInvalidMessage()
+    public void testInvalidPacket_NO_CLIENT_SERVER_SETUP()
     {
         String input = ADDRESS + "|" + PORT + "|" + invalidString;
         String[] packet = input.split("\\|");
         Assert.assertFalse(packet[2].toCharArray().length <= MAX_SIZE);
     }
 
-    /*
-    @Test
-    public void testValidMessage()
-    {
-        String data = ADDRESS + "|" + PORT + "|" + validString;
-        InputStream stdin = System.in;
-        try
-        {
-            System.setIn(new ByteArrayInputStream(data.getBytes()));
-            Scanner scanner = new Scanner(System.in);
-            System.out.println(scanner.nextLine());
-        }
-        finally
-        {
-            System.setIn(stdin);
-        }
-    }
-    */
 
-    /*
     @Test
-    public void testInvalidMessage()
+    public void testValidPacket()
     {
-        UDPClient.main(new String[] {ADDRESS, PORT, invalidString});
         String data = ADDRESS + "|" + PORT + "|" + validString;
-        InputStream stdin = System.in;
-        try
-        {
-            System.setIn(new ByteArrayInputStream(data.getBytes()));
-            Scanner scanner = new Scanner(System.in);
-            System.out.println(scanner.nextLine());
-        }
-        finally
-        {
-            System.setIn(stdin);
-        }
+        UDPClient.main(new String[] {data});
+
+        Assert.assertTrue(UDPServer.isPacketRecieve());
     }
-    */
+
+
+
+    @Test
+    public void testInvalidPacket()
+    {
+        UDPServer server = new UDPServer();
+        String data = ADDRESS + "|" + PORT + "|" + invalidString;
+        UDPClient.main(new String[] {data});
+
+    }
 
 }

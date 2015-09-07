@@ -1,5 +1,8 @@
-import java.net.*;
-import java.io.*;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.HashMap;
 
 /**
@@ -12,11 +15,14 @@ public class UDPServer
 	private static DatagramSocket aSocket = null;
 	private static HashMap<InetAddress, Integer> IPMessageMap;
 	private static final int BUFFER_SIZE = 1000;
+	private static boolean packetReceive; //Testing purpose
 
 	public static void main(String[] args)
 	{
 		try
 		{
+			setPacketRecieve(false);
+
 			IPMessageMap = new HashMap<>();
 			aSocket = new DatagramSocket(7007);
 			// create socket at agreed port
@@ -31,6 +37,7 @@ public class UDPServer
 				if (requestIsValid())
 				{
 					handleValidMessage();
+					setPacketRecieve(true);
 				}
 				else
 				{
@@ -80,5 +87,15 @@ public class UDPServer
 			e.printStackTrace();
 			System.out.println("");
 		}
+	}
+
+
+	//Testing methods
+	public static boolean isPacketRecieve(){
+		return packetReceive;
+	}
+
+	private static void setPacketRecieve(boolean isReceived){
+		packetReceive = isReceived;
 	}
 }
