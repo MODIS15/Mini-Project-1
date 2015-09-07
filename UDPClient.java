@@ -23,6 +23,9 @@ public class UDPClient
 		initialize();
 	}
 
+
+	//Client methods
+
 	/**
 	 * Initialize the system
 	 */
@@ -30,27 +33,31 @@ public class UDPClient
 		try
 		{
 			String[] packet = setPacket();
-			if (packet != null && packet[2].toCharArray().length <= MAX_SIZE) // Check content and message size
+			if (validatePacket(packet))
 			{
 				send(packet);
-			}
-			else
-			{
-				System.out.println("Something went wrong...");
-				System.out.println("\n---Resetting client...");
-				initialize();
 			}
 		}
 		catch (Exception e)
 		{
 			System.out.println(e.getMessage());
 			System.out.println("Something went wrong...");
-			System.out.println("\n---Resetting client...");
-
-			initialize();
+			resetClient();
 		}
-
 	}
+
+	/**
+	 * Method used to restart the client.
+	 */
+	private void resetClient(){
+		System.out.println("\n---Resetting client...");
+		System.out.println("\n");
+		initialize();
+	}
+
+
+
+	//Packet methods
 
 	/**
 	 * Create a packet with host address, port and message (with hashcode) from user input.
@@ -85,6 +92,77 @@ public class UDPClient
 	}
 
 	/**
+	 * Sends packet to host server.
+	 * @param inputData including address, port and message.
+	 */
+	private void send(String[] inputData)
+	{
+		DatagramSocket aSocket = null;
+		String address = inputData[0];
+		int port = Integer.parseInt(inputData[1]);
+		int tryCount = 3;
+		int messageCount = inputData.length-2;
+
+		for(int i = 2; i < inputData.length ; i++)
+		{
+			System.out.println("\nSending message " + (i-1) + "." );
+
+			String message = inputData[i];
+
+			try
+			{
+				aSocket = new DatagramSocket();
+				byte[] m = message.getBytes();
+				InetAddress aHost = InetAddress.getByName(address);
+				DatagramPacket request = new DatagramPacket(m, message.length(), aHost, port);
+
+				aSocket.send(request);
+
+				//Check if server has received datagram
+				System.out.println("Waiting for host...");
+				boolean packetOK = checkReceive(aSocket);
+
+				if(!packetOK && tryCount > 0)
+				{
+					i--;
+					tryCount--;
+				}
+
+				else if (!packetOK && tryCount == 0)
+				{
+					if(inputData.length < 3)
+					{
+						messageCount--;
+						System.out.println("Message could not be sent.");
+					}
+					else if (i < inputData.length)
+					{
+						messageCount--;
+						tryCount = 3;
+						System.out.println("\nMessage " + (i - 1) + " could not be sent. Skipping to next message.");
+					}
+				}
+				else if(packetOK) System.out.println("Success.");
+
+			}
+			catch (SocketException e) 	{System.out.println("Socket: " + e.getMessage());}
+			catch (IOException e)		{System.out.println("IO: " + e.getMessage());}
+			finally {
+				if (aSocket != null) aSocket.close();
+			}
+		}
+
+		if(messageCount < inputData.length-2)
+		{
+			System.out.println("\nSome messages could not be sent.");
+		}
+	}
+
+
+
+	//Validation methods
+
+	/**
 	 * Checks if address and port input is valid.
 	 * @param packetData - array with address, port and message.
 	 * @return true if address and port is valid.
@@ -112,94 +190,6 @@ public class UDPClient
 	}
 
 	/**
-	 * Sends packet to host server.
-	 * @param inputData including address, port and message.
-	 */
-	private void send(String[] inputData)
-	{
-		DatagramSocket aSocket = null;
-		String address = inputData[0];
-		int port = Integer.parseInt(inputData[1]);
-		int tryCount = 3;
-		int messageCount = inputData.length-2;
-
-		for(int i = 2; i < inputData.length ; i++)
-		{
-			System.out.println("\nSending message " + (i-1) + "." );
-
-			String message = inputData[i];
-
-			try
-			{
-				aSocket = new DatagramSocket();
-				byte[] m = message.getBytes();
-				InetAddress aHost = InetAddress.getByName(address);
-				DatagramPacket request = new DatagramPacket(m, message.length(), aHost, port);
-
-
-				aSocket.send(request);
-
-
-				//Check if server has received datagram
-				System.out.println("Waiting for host...");
-
-
-
-				//Checking sent packet
-				boolean packetOK = false;
-				if(checkReceive(aSocket)) packetOK  = true;
-
-				if(!packetOK && tryCount > 0)
-				{
-					i--;
-					tryCount--;
-				}
-
-				else if (!packetOK && tryCount == 0)
-				{
-					if(inputData.length < 3)
-					{
-						messageCount--;
-						System.out.println("Message could not be sent.");
-					}
-					else if (i < inputData.length)
-					{
-						messageCount--;
-						tryCount = 3;
-						System.out.println("\nMessage " + (i - 1) + " could not be sent. Skipping to next message.");
-					}
-				}
-
-				else if(packetOK) System.out.println("Success.");
-
-
-			}
-			catch (SocketException e)
-			{
-				System.out.println("Socket: " + e.getMessage());
-			}
-			catch (IOException e)
-			{
-				System.out.println("IO: " + e.getMessage());
-			}
-			finally
-			{
-				if (aSocket != null) aSocket.close();
-			}
-
-		}
-		// Resetting client
-		if(messageCount < inputData.length-2)
-		{
-			System.out.println("\nSome messages could not be sent.");
-		}
-
-		System.out.println("\n---Resetting client...");
-		System.out.println("\n");
-		initialize();
-	}
-
-	/**
 	 * Checking if host has received sent message and also if it was non-corrupt when it arrived
 	 * @return
 	 * @throws IOException
@@ -210,7 +200,7 @@ public class UDPClient
 		DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
 		try
 		{
-			aSocket.setSoTimeout(TIMEOUT_SIZE); // Timeout after 5 seconds
+			aSocket.setSoTimeout(TIMEOUT_SIZE);
 			aSocket.receive(reply);
 
 			if(reply.getAddress() == null) return false;
@@ -231,6 +221,26 @@ public class UDPClient
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	/**
+	 * Validate if a packet is not null and also that it doesn't contains messages with a size greater than allowed.
+	 * @param packet
+	 * @return boolean
+	 */
+	private boolean validatePacket(String[] packet)throws NullPointerException{
+
+		if(packet == null){
+			throw new NullPointerException("Packet was null");
+		}
+
+		for(int i = 2 ; i< packet.length ; i++)
+		{
+			if(packet.length > MAX_SIZE) {
+				throw new StringIndexOutOfBoundsException("Message " +(i-1)+": "+ "'"+packet[i]+"'" + "is to long");
+			}
+		}
+		return true;
 	}
 
 }
