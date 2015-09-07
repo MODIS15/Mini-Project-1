@@ -147,7 +147,7 @@ public class UDPClient
 
 				//Checking sent packet
 				boolean packetOK = false;
-				if(checkReceive(aSocket)) packetOK  = true;
+				if(isReceived(aSocket)) packetOK  = true;
 
 				if(!packetOK && tryCount > 0)
 				{
@@ -204,7 +204,7 @@ public class UDPClient
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean checkReceive(DatagramSocket aSocket) throws IOException
+	private boolean isReceived(DatagramSocket aSocket) throws IOException
 	{
 		byte[] buffer = new byte[BUFFER_SIZE];
 		DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
