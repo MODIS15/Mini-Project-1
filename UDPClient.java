@@ -138,6 +138,7 @@ public class UDPClient
 					sendMessage(inputData, message, address, port);
 				}
 			});
+			thread.start();
 		}
 
 		// Reset client
