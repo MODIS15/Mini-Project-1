@@ -39,7 +39,7 @@ public class opgave3
 
         try
         {
-            sendingSocket = new SocketUDP();
+            sendingSocket = new DatagramSocket();
             sender = new SendingThread(sendingSocket, transmissionInterval,amountOfDatagramsSent);
             Thread senderThread   = new Thread(sender);
             senderThread.start();
@@ -93,7 +93,7 @@ public class opgave3
         return _filerData;
     }
 
-///Not Quit done
+///Not Quite done
     public int amountOfLostDatagrams()
     {
         return messageList.length-occurrence.size();
@@ -119,7 +119,7 @@ public class opgave3
         else
             return 0;
     }
-///Not Quit done
+///Not Quite done
 
 
 

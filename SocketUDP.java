@@ -27,7 +27,7 @@ public class SocketUDP extends DatagramSocket {
     public void send(DatagramPacket _package)
     {
         addMessageTOQueue(_package);
-        System.out.println("Packages in store: "+packages.size());
+        //System.out.println("Packages in store: "+packages.size());
 
         if(random.nextBoolean())
         {
