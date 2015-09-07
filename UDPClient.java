@@ -55,8 +55,6 @@ public class UDPClient
 		initialize();
 	}
 
-
-
 	//Packet methods
 
 	/**
@@ -120,13 +118,7 @@ public class UDPClient
 
 				//Check if server has received datagram
 				System.out.println("Waiting for host...");
-				boolean packetOK = checkReceive(aSocket);
-
-
-
-				//Checking sent packet
-				boolean packetOK = false;
-				if(isReceived(aSocket)) packetOK  = true;
+				boolean packetOK = isReceived(aSocket);
 
 				if(!packetOK && tryCount > 0)
 				{
@@ -162,6 +154,7 @@ public class UDPClient
 		{
 			System.out.println("\nSome messages could not be sent.");
 		}
+
 	}
 
 
@@ -234,15 +227,18 @@ public class UDPClient
 	 * @param packet
 	 * @return boolean
 	 */
-	private boolean validatePacket(String[] packet)throws NullPointerException{
+	private boolean validatePacket(String[] packet)throws NullPointerException
+	{
 
-		if(packet == null){
+		if(packet == null)
+		{
 			throw new NullPointerException("Packet was null");
 		}
 
 		for(int i = 2 ; i< packet.length ; i++)
 		{
-			if(packet.length > MAX_SIZE) {
+			if(packet.length > MAX_SIZE)
+			{
 				throw new StringIndexOutOfBoundsException("Message " +(i-1)+": "+ "'"+packet[i]+"'" + "is to long");
 			}
 		}
