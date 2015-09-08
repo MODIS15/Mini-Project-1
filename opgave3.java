@@ -6,7 +6,7 @@ public class opgave3
 {
     HashSet<String> receivedMessages = new HashSet<>(); //Received messages. Used to keep count on duplicate messages
     String[] messageList; //Stores all sent messages.
-    int amountOfMessageReceived;
+    int receivedMessageCounter;
 
     SendingThread sender;         //Sending thread. Splitting receiver and sender in two different threads
     String fillerData;            //Filler data used to append package data to adjust package size
@@ -16,15 +16,15 @@ public class opgave3
     String IPDestination = "10.25.218.224";
     int sendingToPort = 7007;
 
-    int listeningPort = 7007;
+    //int listeningPort = 80;
 
     public static void main(String[] args)
     {
         System.out.println("Opgave 3 start");
         System.out.println("Transmitting packages");
-        opgave3 program = new opgave3(50,6,1);
+        opgave3 program = new opgave3(500,1000,1);
 
-        System.out.println("Amount of datagrams resived: "+ program.getAmountOfMessageReceived());
+        System.out.println("Amount of datagrams resived: "+ program.getReceivedMessageCounter());
         System.out.println("Amount of datagrams lost: " + program.amountOfLostDatagrams());
         System.out.println("Amount of datagrams lost in percentage: " + program.amountOfLostDatagramsInPercentage());
         System.out.println("Amount of datagrams duplicates: " + program.amountOFDuplicateDatagram());
@@ -47,13 +47,13 @@ public class opgave3
             senderThread.start();
 
             //Receiving thread
-            DatagramSocket socket = new DatagramSocket(listeningPort);
-            socket.setSoTimeout(5000);
+            //DatagramSocket socket = new DatagramSocket(listeningPort);
+            sendingSocket.setSoTimeout(5000);
             byte[] buffer = new byte[1000];
             while(SendingThreadIsStillActive)
             {
                 DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-                socket.receive(reply);
+                sendingSocket.receive(reply);
                 String message = new String(reply.getData());
                 updateOccurrenceRatings(message);
                 //System.out.println(message);
@@ -64,11 +64,11 @@ public class opgave3
         catch (IOException e) {e.printStackTrace();}
     }
 
-    public int getAmountOfMessageReceived() {return amountOfMessageReceived;}
+    public int getReceivedMessageCounter() {return receivedMessageCounter;}
 
     private void updateOccurrenceRatings(String reply)
     {
-        amountOfMessageReceived++;
+        receivedMessageCounter++;
         receivedMessages.add(reply);
     }
 
@@ -103,20 +103,20 @@ public class opgave3
     public double amountOfLostDatagramsInPercentage()
     {
         if(receivedMessages.size()!=0)
-            return (((double) messageList.length- (double) receivedMessages.size())/messageList.length)*100;
+            return (double) (( messageList.length - receivedMessages.size())/messageList.length)*100;
         else
-            return 0;
+            return 100;
     }
 
     public int amountOFDuplicateDatagram()
     {
-        return amountOfMessageReceived- receivedMessages.size();
+        return receivedMessageCounter - receivedMessages.size();
     }
 
     public double amountOFDuplicateDatagramInPercentage()
     {
         if(receivedMessages.size()!= 0)
-            return (((double)amountOfMessageReceived-(double) receivedMessages.size())/ receivedMessages.size())*100;
+            return (((double) receivedMessageCounter -(double) receivedMessages.size())/ receivedMessages.size())*100;
         else
             return 0;
     }
@@ -177,7 +177,7 @@ public class SendingThread implements Runnable{
                     InetAddress host = InetAddress.getByName(IPDestination);
                     DatagramPacket packet = new DatagramPacket(message, _message.length(), host, sendingToPort);
                     socket.send(packet);
-                    Thread.sleep(1000*_timeOut);
+                    Thread.sleep(_timeOut);
 
                 }
                 catch (SocketException e) {e.printStackTrace();}
