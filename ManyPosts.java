@@ -22,7 +22,7 @@ public class ManyPosts {
 
         DatagramSocket socket = null;
         try {
-            socket = new SocketUDP();
+            socket = new QuestionableDatagramSocket();
         } catch (SocketException e) {
             e.printStackTrace();
         }

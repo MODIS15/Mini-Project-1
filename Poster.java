@@ -19,7 +19,7 @@ public class Poster {
 
         try
         {
-            socket = new SocketUDP();
+            socket = new QuestionableDatagramSocket();
             InetAddress host = InetAddress.getByName(IPDestination);
             DatagramPacket packet = new DatagramPacket(message,_message.length(),host,port);
             socket.send(packet);
