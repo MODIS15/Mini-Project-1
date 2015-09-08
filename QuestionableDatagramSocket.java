@@ -9,17 +9,17 @@ import java.util.ArrayList;
 import java.util.Random;
 
 
-public class SocketUDP extends DatagramSocket {
+public class QuestionableDatagramSocket extends DatagramSocket {
 
     ArrayList<DatagramPacket> packages = new ArrayList<>();
 
     Random random = new Random();
 
 
-    public SocketUDP() throws SocketException {
+    public QuestionableDatagramSocket() throws SocketException {
     }
 
-    public SocketUDP(int i) throws SocketException{
+    public QuestionableDatagramSocket(int i) throws SocketException{
         super(i);
     }
 
