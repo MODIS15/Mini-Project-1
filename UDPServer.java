@@ -32,7 +32,7 @@ public class UDPServer
 			{
 				request = new DatagramPacket(buffer, buffer.length);
 				aSocket.receive(request);
-				dividedMessage = new String(request.getData()).split("�");
+				dividedMessage = new String(request.getData()).split("\\$");
 
 				if (requestIsValid())
 				{

@@ -49,7 +49,8 @@ public class UDPClient
 	/**
 	 * Method used to restart the client.
 	 */
-	private void resetClient(){
+	private void resetClient()
+	{
 		System.out.println("\n---Resetting client...");
 		System.out.println("\n");
 		initialize();
@@ -79,7 +80,7 @@ public class UDPClient
 				for (int i = 2; i < packetData.length; i++)
 				{
 					String tempMessage = packetData[i];
-					String messageWithHashCode = new String(tempMessage + "¤" + tempMessage.hashCode()+"¤"+(i-2)+"¤");
+					String messageWithHashCode = new String(tempMessage + "$" + tempMessage.hashCode()+"$"+(i-2)+"$");
 					packetData[i] = messageWithHashCode;
 				}
 				return packetData;
@@ -154,6 +155,8 @@ public class UDPClient
 		{
 			System.out.println("\nSome messages could not be sent.");
 		}
+
+		resetClient();
 
 	}
 
