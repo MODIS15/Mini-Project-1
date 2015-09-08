@@ -24,7 +24,7 @@ public class opgave3
         System.out.println("Transmitting packages");
         opgave3 program = new opgave3(500,1000,1);
 
-        System.out.println("Amount of datagrams resived: "+ program.getAmountOfMessageReceived());
+        System.out.println("Amount of datagrams resived: "+ program.getReceivedMessageCounter());
         System.out.println("Amount of datagrams lost: " + program.amountOfLostDatagrams());
         System.out.println("Amount of datagrams lost in percentage: " + program.amountOfLostDatagramsInPercentage());
         System.out.println("Amount of datagrams duplicates: " + program.amountOFDuplicateDatagram());
