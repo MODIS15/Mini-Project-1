@@ -24,12 +24,11 @@ public class opgave3
         System.out.println("Transmitting packages");
         opgave3 program = new opgave3(50,6,1);
 
+        System.out.println("Amount of datagrams resived: "+ program.getAmountOfMessageReceived());
         System.out.println("Amount of datagrams lost: " + program.amountOfLostDatagrams());
         System.out.println("Amount of datagrams lost in percentage: " + program.amountOfLostDatagramsInPercentage());
         System.out.println("Amount of datagrams duplicates: " + program.amountOFDuplicateDatagram());
         System.out.println("Amount of datagrams duplicates in percentage: " + program.amountOFDuplicateDatagramInPercentage());
-
-
     }
 
 
@@ -46,7 +45,6 @@ public class opgave3
             sender = new SendingThread(sendingSocket, transmissionInterval,amountOfDatagramsSent);
             Thread senderThread   = new Thread(sender);
             senderThread.start();
-
 
             //Receiving thread
             DatagramSocket socket = new DatagramSocket(listeningPort);
@@ -66,6 +64,7 @@ public class opgave3
         catch (IOException e) {e.printStackTrace();}
     }
 
+    public int getAmountOfMessageReceived() {return amountOfMessageReceived;}
 
     private void updateOccurrenceRatings(String reply)
     {
