@@ -13,7 +13,7 @@ public class opgave3
     boolean SendingThreadIsStillActive = true;
 
     DatagramSocket sendingSocket; //Sending socket
-    String IPDestination = "localhost";
+    String IPDestination = "10.25.218.224";
     int sendingToPort = 7007;
 
     int listeningPort = 7007;
