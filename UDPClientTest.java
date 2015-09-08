@@ -64,7 +64,7 @@ public class UDPClientTest
         String data = ADDRESS + "|" + PORT + "|" + validString;
         UDPClient.main(new String[] {data});
 
-        Assert.assertTrue(UDPServer.isPacketRecieve());
+        Assert.assertTrue(UDPServer.isPacketReceive());
     }
 
 

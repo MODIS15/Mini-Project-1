@@ -21,7 +21,7 @@ public class UDPServer
 	{
 		try
 		{
-			setPacketRecieve(false);
+			setPacketReceive(false);
 
 			IPMessageMap = new HashMap<>();
 			aSocket = new DatagramSocket(7007);
@@ -34,10 +34,10 @@ public class UDPServer
 				aSocket.receive(request);
 				dividedMessage = new String(request.getData()).split("\\$");
 
-				if (requestIsValid())
+				if (isRequestValid())
 				{
 					handleValidMessage();
-					setPacketRecieve(true);
+					setPacketReceive(true);
 				}
 				else
 				{
@@ -56,7 +56,7 @@ public class UDPServer
 	 * Checks whether the packet address is valid.
 	 * @return true if address is valid.
 	 */
-	private static boolean requestIsValid ()
+	private static boolean isRequestValid()
 	{
 		if(IPMessageMap.get(request.getAddress()) != null)
 			return dividedMessage[0].hashCode() == Integer.parseInt(dividedMessage[1])
@@ -91,11 +91,11 @@ public class UDPServer
 
 
 	//Testing methods
-	public static boolean isPacketRecieve(){
+	public static boolean isPacketReceive(){
 		return packetReceive;
 	}
 
-	private static void setPacketRecieve(boolean isReceived){
+	private static void setPacketReceive(boolean isReceived){
 		packetReceive = isReceived;
 	}
 }

@@ -242,7 +242,7 @@ public class UDPClient
 		{
 			if(packet.length > MAX_SIZE)
 			{
-				throw new StringIndexOutOfBoundsException("Message " +(i-1)+": "+ "'"+packet[i]+"'" + "is to long");
+				throw new StringIndexOutOfBoundsException("Message " + (i-1)+": " + "'" + packet[i] + "'" + "is to long");
 			}
 		}
 		return true;
