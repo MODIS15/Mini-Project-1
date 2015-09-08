@@ -13,10 +13,10 @@ public class opgave3
     boolean SendingThreadIsStillActive = true;
 
     DatagramSocket sendingSocket; //Sending socket
-    String IPDestination = "10.25.218.224";
+    String IPDestination = "localhost";
     int sendingToPort = 7007;
 
-    //int listeningPort = 80;
+    int listeningPort = 7007;
 
     public static void main(String[] args)
     {
@@ -29,6 +29,11 @@ public class opgave3
         System.out.println("Amount of datagrams lost in percentage: " + program.amountOfLostDatagramsInPercentage());
         System.out.println("Amount of datagrams duplicates: " + program.amountOFDuplicateDatagram());
         System.out.println("Amount of datagrams duplicates in percentage: " + program.amountOFDuplicateDatagramInPercentage());
+
+
+
+
+
     }
 
 
@@ -47,13 +52,16 @@ public class opgave3
             senderThread.start();
 
             //Receiving thread
-            //DatagramSocket socket = new DatagramSocket(listeningPort);
-            sendingSocket.setSoTimeout(5000);
+            DatagramSocket socket = new DatagramSocket(listeningPort);
+            socket.setSoTimeout(5000);
+            //sendingSocket.setSoTimeout(5000);
             byte[] buffer = new byte[1000];
             while(SendingThreadIsStillActive)
             {
                 DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-                sendingSocket.receive(reply);
+                socket.receive(reply);
+
+                //sendingSocket.receive(reply);
                 String message = new String(reply.getData());
                 updateOccurrenceRatings(message);
                 //System.out.println(message);
@@ -103,7 +111,7 @@ public class opgave3
     public double amountOfLostDatagramsInPercentage()
     {
         if(receivedMessages.size()!=0)
-            return (double) (( messageList.length - receivedMessages.size())/messageList.length)*100;
+            return (double) (((receivedMessages.size())/messageList.length)*100);
         else
             return 100;
     }
