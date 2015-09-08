@@ -4,15 +4,19 @@ import java.util.HashSet;
 
 public class opgave3
 {
+    HashSet<String> receivedMessages = new HashSet<>(); //Received messages. Used to keep count on duplicate messages
+    String[] messageList; //Stores all sent messages.
+    int amountOfMessageReceived;
 
-
-    HashSet<String> occurrence = new HashSet<>(); //Received messages. Used to keep count on duplicate messages
-    DatagramSocket sendingSocket; //Sending socket
     SendingThread sender;         //Sending thread. Splitting receiver and sender in two different threads
     String fillerData;            //Filler data used to append package data to adjust package size
     boolean SendingThreadIsStillActive = true;
-    String[] messageList; //Stores all sent messages.
-    int amountOfMessageReceived;
+
+    DatagramSocket sendingSocket; //Sending socket
+    String IPDestination = "localhost";
+    int sendingToPort = 7007;
+
+    int listeningPort = 7007;
 
     public static void main(String[] args)
     {
@@ -34,7 +38,6 @@ public class opgave3
 
     public opgave3(int datagramSize, int amountOfDatagramsSent, int transmissionInterval)
     {
-
         fillerData = createFillerData(datagramSize);
 
         try
@@ -46,7 +49,7 @@ public class opgave3
 
 
             //Receiving thread
-            DatagramSocket socket = new DatagramSocket(7007);
+            DatagramSocket socket = new DatagramSocket(listeningPort);
             socket.setSoTimeout(5000);
             byte[] buffer = new byte[1000];
             while(SendingThreadIsStillActive)
@@ -61,14 +64,13 @@ public class opgave3
         catch (SocketTimeoutException e ){}
         catch (SocketException e) {e.printStackTrace();}
         catch (IOException e) {e.printStackTrace();}
-
     }
 
 
     private void updateOccurrenceRatings(String reply)
     {
         amountOfMessageReceived++;
-        occurrence.add(reply);
+        receivedMessages.add(reply);
     }
 
     private String createFillerData(int memorySize)
@@ -96,26 +98,26 @@ public class opgave3
 ///Not Quite done
     public int amountOfLostDatagrams()
     {
-        return messageList.length-occurrence.size();
+        return messageList.length- receivedMessages.size();
     }
 
     public double amountOfLostDatagramsInPercentage()
     {
-        if(occurrence.size()!=0)
-            return (((double) messageList.length- (double)occurrence.size())/messageList.length)*100;
+        if(receivedMessages.size()!=0)
+            return (((double) messageList.length- (double) receivedMessages.size())/messageList.length)*100;
         else
             return 0;
     }
 
     public int amountOFDuplicateDatagram()
     {
-        return amountOfMessageReceived-occurrence.size();
+        return amountOfMessageReceived- receivedMessages.size();
     }
 
     public double amountOFDuplicateDatagramInPercentage()
     {
-        if(occurrence.size()!= 0)
-            return (((double)amountOfMessageReceived-(double)occurrence.size())/occurrence.size())*100;
+        if(receivedMessages.size()!= 0)
+            return (((double)amountOfMessageReceived-(double) receivedMessages.size())/ receivedMessages.size())*100;
         else
             return 0;
     }
@@ -131,7 +133,6 @@ public class opgave3
 public class SendingThread implements Runnable{
 
         DatagramSocket socket;
-        String IPDestination = "localhost";
         int _timeOut;
 
 
@@ -162,18 +163,20 @@ public class SendingThread implements Runnable{
         public void run()
         {
 
+            try {Thread.sleep(1000);}   //Initial sleep. Gives the receiver time to start
+            catch (InterruptedException e) {e.printStackTrace();}
+
             for (int i = 0; i<messageList.length; i++)
             {
-
                 byte[] message = messageList[i].getBytes();
                 String _message = messageList[i];
 
-                int port = 7007;
+
 
                 try
                 {
                     InetAddress host = InetAddress.getByName(IPDestination);
-                    DatagramPacket packet = new DatagramPacket(message, _message.length(), host, port);
+                    DatagramPacket packet = new DatagramPacket(message, _message.length(), host, sendingToPort);
                     socket.send(packet);
                     Thread.sleep(1000*_timeOut);
 
