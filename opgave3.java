@@ -4,7 +4,7 @@ import java.util.HashSet;
 
 public class opgave3
 {
-    HashSet<String> receivedMessages = new HashSet<>(); //Received messages. Used to keep count on duplicate messages
+    static HashSet<String> receivedMessages = new HashSet<>(); //Received messages. Used to keep count on duplicate messages
     String[] messageList; //Stores all sent messages.
     int receivedMessageCounter;
 
@@ -13,31 +13,24 @@ public class opgave3
     boolean SendingThreadIsStillActive = true;
 
     DatagramSocket sendingSocket; //Sending socket
-    String IPDestination = "localhost";
-    int sendingToPort = 7007;
+    String IPDestination = "tiger.itu.dk";
+    int sendingToPort = 7;
 
-    int listeningPort = 7007;
+    int listeningPort = 7;
 
     public static void main(String[] args)
     {
         System.out.println("Opgave 3 start");
         System.out.println("Transmitting packages");
-        opgave3 program = new opgave3(500,1000,1);
+        opgave3 program = new opgave3(25,1000,5);
 
         System.out.println("Amount of datagrams resived: "+ program.getReceivedMessageCounter());
+        System.out.println(receivedMessages.size());
         System.out.println("Amount of datagrams lost: " + program.amountOfLostDatagrams());
         System.out.println("Amount of datagrams lost in percentage: " + program.amountOfLostDatagramsInPercentage());
         System.out.println("Amount of datagrams duplicates: " + program.amountOFDuplicateDatagram());
         System.out.println("Amount of datagrams duplicates in percentage: " + program.amountOFDuplicateDatagramInPercentage());
-
-
-
-
-
     }
-
-
-
 
 
     public opgave3(int datagramSize, int amountOfDatagramsSent, int transmissionInterval)
@@ -52,16 +45,17 @@ public class opgave3
             senderThread.start();
 
             //Receiving thread
-            DatagramSocket socket = new DatagramSocket(listeningPort);
-            socket.setSoTimeout(5000);
-            //sendingSocket.setSoTimeout(5000);
+            //DatagramSocket socket = new DatagramSocket(listeningPort);
+            //socket.setSoTimeout(5000);
+
+            sendingSocket.setSoTimeout(5000);
             byte[] buffer = new byte[1000];
             while(SendingThreadIsStillActive)
             {
                 DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-                socket.receive(reply);
+                //socket.receive(reply);
 
-                //sendingSocket.receive(reply);
+                sendingSocket.receive(reply);
                 String message = new String(reply.getData());
                 updateOccurrenceRatings(message);
                 //System.out.println(message);
@@ -105,7 +99,7 @@ public class opgave3
 ///Not Quite done
     public int amountOfLostDatagrams()
     {
-        return messageList.length- receivedMessages.size();
+        return messageList.length-receivedMessages.size();
     }
 
     public double amountOfLostDatagramsInPercentage()
@@ -129,10 +123,6 @@ public class opgave3
             return 0;
     }
 ///Not Quite done
-
-
-
-
 
 
 
@@ -173,12 +163,13 @@ public class SendingThread implements Runnable{
             try {Thread.sleep(1000);}   //Initial sleep. Gives the receiver time to start
             catch (InterruptedException e) {e.printStackTrace();}
 
+            byte[] message;
+            String _message;
+
             for (int i = 0; i<messageList.length; i++)
             {
-                byte[] message = messageList[i].getBytes();
-                String _message = messageList[i];
-
-
+                message = messageList[i].getBytes();
+                _message = messageList[i];
 
                 try
                 {
@@ -186,7 +177,6 @@ public class SendingThread implements Runnable{
                     DatagramPacket packet = new DatagramPacket(message, _message.length(), host, sendingToPort);
                     socket.send(packet);
                     Thread.sleep(_timeOut);
-
                 }
                 catch (SocketException e) {e.printStackTrace();}
                 catch (UnknownHostException e) {e.printStackTrace();}
@@ -196,6 +186,23 @@ public class SendingThread implements Runnable{
                 try {Thread.sleep(_timeOut);}
                 catch (InterruptedException e) {e.printStackTrace();}
             }
+            /*
+            try
+            {
+                _message = "Good bedring :)";
+                message = _message.getBytes();
+
+                InetAddress host = InetAddress.getByName(IPDestination);
+                DatagramPacket packet = new DatagramPacket(message, _message.length(), host, sendingToPort);
+                socket.send(packet);
+                Thread.sleep(_timeOut);
+            }
+            catch (SocketException e) {e.printStackTrace();}
+            catch (UnknownHostException e) {e.printStackTrace();}
+            catch (IOException e) {e.printStackTrace();} catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            */
 
             //All messages has been sent. Signal listener to close
             SendingThreadIsStillActive = false;
