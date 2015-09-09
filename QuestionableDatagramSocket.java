@@ -30,11 +30,8 @@ public class QuestionableDatagramSocket extends DatagramSocket {
 
         if(random.nextBoolean())
         {
-
-
             while(!packages.isEmpty()) //All stored messages
             {
-
                 try {sendMessage(getRandomPackage());}
                 catch (IOException e) {e.printStackTrace();}
             }
@@ -43,20 +40,11 @@ public class QuestionableDatagramSocket extends DatagramSocket {
 
     private void sendMessage(DatagramPacket _package) throws IOException
     {
-
-        int action = random.nextInt(4);
-        switch(action)
-        {
-            case 0: super.send(_package);
-                break;
-            case 1: super.send(_package); super.send(_package);
-                break;
-            case 2: super.send(distortData(_package));
-                break;
-            default:
-                return;
-        }
-
+        int action = random.nextInt(100);
+        if (action >= 0 && 25 >= action){super.send(_package);}
+        else if (action >= 25 && 50 >= action){super.send(_package); super.send(_package);}
+        else if (action >= 50 && 75 >= action){super.send(distortData(_package));}
+        else {return;}
     }
 
     private DatagramPacket distortData(DatagramPacket _package)

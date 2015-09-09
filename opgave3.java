@@ -13,8 +13,8 @@ public class opgave3
     boolean SendingThreadIsStillActive = true;
 
     DatagramSocket sendingSocket; //Sending socket
-    String IPDestination = "10.25.219.126";
-    int sendingToPort = 7007;
+    String IPDestination = "tiger.itu.dk";
+    int sendingToPort = 7;
 
     int listeningPort = 7;
 
@@ -105,7 +105,7 @@ public class opgave3
     public double amountOfLostDatagramsInPercentage()
     {
         if(receivedMessages.size() != 0)
-            return ((((double)receivedMessages.size())/(double)messageList.length)*100);
+            return ((((double)amountOfLostDatagrams())/(double)messageList.length)*100);
         else
             return 100;
     }
