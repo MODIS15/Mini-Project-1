@@ -118,7 +118,7 @@ public class opgave3
 
     public int amountOFDuplicateDatagram()
     {
-        return receivedMessageCounter - receivedMessages.size();
+        return receivedMessageCounter - messageList.length;
     }
 
     public double amountOFDuplicateDatagramInPercentage()
