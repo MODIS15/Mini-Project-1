@@ -15,7 +15,6 @@ public class QuestionableDatagramSocket extends DatagramSocket {
 
     Random random = new Random();
 
-
     public QuestionableDatagramSocket() throws SocketException {
     }
 
