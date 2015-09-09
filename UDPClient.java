@@ -80,7 +80,7 @@ public class UDPClient
 				for (int i = 2; i < packetData.length; i++)
 				{
 					String tempMessage = packetData[i];
-					String messageWithHashCode = new String(tempMessage + "$" + tempMessage.hashCode()+"$"+(i-2)+"$");
+					String messageWithHashCode = new String(tempMessage + "$" + tempMessage.hashCode()+"$");
 					packetData[i] = messageWithHashCode;
 				}
 				return packetData;
