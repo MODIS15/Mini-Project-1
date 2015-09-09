@@ -13,8 +13,8 @@ public class opgave3
     boolean SendingThreadIsStillActive = true;
 
     DatagramSocket sendingSocket; //Sending socket
-    String IPDestination = "tiger.itu.dk";
-    int sendingToPort = 7;
+    String IPDestination = "10.25.219.126";
+    int sendingToPort = 7007;
 
     int listeningPort = 7;
 
@@ -22,14 +22,14 @@ public class opgave3
     {
         System.out.println("Opgave 3 start");
         System.out.println("Transmitting packages");
-        opgave3 program = new opgave3(25,1000,5);
+        opgave3 program = new opgave3(1,200,5);
 
-        System.out.println("Amount of datagrams resived: "+ program.getReceivedMessageCounter());
-        System.out.println(receivedMessages.size());
+        System.out.println("Amount of datagrams resived: "+ receivedMessages.size());
         System.out.println("Amount of datagrams lost: " + program.amountOfLostDatagrams());
         System.out.println("Amount of datagrams lost in percentage: " + program.amountOfLostDatagramsInPercentage());
         System.out.println("Amount of datagrams duplicates: " + program.amountOFDuplicateDatagram());
         System.out.println("Amount of datagrams duplicates in percentage: " + program.amountOFDuplicateDatagramInPercentage());
+
     }
 
 
@@ -104,8 +104,8 @@ public class opgave3
 
     public double amountOfLostDatagramsInPercentage()
     {
-        if(receivedMessages.size()!=0)
-            return (double) (((receivedMessages.size())/messageList.length)*100);
+        if(receivedMessages.size() != 0)
+            return ((((double)receivedMessages.size())/(double)messageList.length)*100);
         else
             return 100;
     }
@@ -186,23 +186,6 @@ public class SendingThread implements Runnable{
                 try {Thread.sleep(_timeOut);}
                 catch (InterruptedException e) {e.printStackTrace();}
             }
-            /*
-            try
-            {
-                _message = "Good bedring :)";
-                message = _message.getBytes();
-
-                InetAddress host = InetAddress.getByName(IPDestination);
-                DatagramPacket packet = new DatagramPacket(message, _message.length(), host, sendingToPort);
-                socket.send(packet);
-                Thread.sleep(_timeOut);
-            }
-            catch (SocketException e) {e.printStackTrace();}
-            catch (UnknownHostException e) {e.printStackTrace();}
-            catch (IOException e) {e.printStackTrace();} catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            */
 
             //All messages has been sent. Signal listener to close
             SendingThreadIsStillActive = false;
