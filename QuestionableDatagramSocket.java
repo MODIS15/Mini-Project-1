@@ -14,37 +14,31 @@ public class QuestionableDatagramSocket extends DatagramSocket {
     ArrayList<DatagramPacket> packages = new ArrayList<>();
 
     Random random = new Random();
+    int transmissionInterval;
 
     public QuestionableDatagramSocket() throws SocketException {
     }
 
-    public QuestionableDatagramSocket(int i) throws SocketException{
+    public QuestionableDatagramSocket(int i, int transmissionInterval) throws SocketException{
         super(i);
+        this.transmissionInterval = transmissionInterval;
     }
-
     @Override
     public void send(DatagramPacket _package)
     {
         addMessageTOQueue(_package);
-        //System.out.println("Packages in store: "+packages.size());
 
         if(random.nextBoolean())
         {
             while(!packages.isEmpty()) //All stored messages
             {
-                try {sendMessage(getRandomPackage());}
+                try {super.send(getRandomPackage());}
                 catch (IOException e) {e.printStackTrace();}
+
+                try {Thread.sleep(transmissionInterval);} //Makes sure the packages are transmitted at the same interval as specified from the sender.
+                catch (InterruptedException e) {e.printStackTrace();}
             }
         }
-    }
-
-    private void sendMessage(DatagramPacket _package) throws IOException
-    {
-        int action = random.nextInt(100);
-        if (action >= 0 && 25 >= action){super.send(_package);}
-        else if (action >= 25 && 50 >= action){super.send(_package); super.send(_package);}
-        else if (action >= 50 && 75 >= action){super.send(distortData(_package));}
-        else {return;}
     }
 
     private DatagramPacket distortData(DatagramPacket _package)
@@ -108,11 +102,11 @@ public class QuestionableDatagramSocket extends DatagramSocket {
 
     private void addMessageTOQueue(DatagramPacket _package)
     {
-        packages.add(_package);
-
-        //Maybe add duplicate
         int action = random.nextInt(100);
-        if(action<30)
-            packages.add(_package);
+        if (action >= 0 && 25 >= action){packages.add(_package);}
+        else if (action >= 25 && 50 >= action){packages.add(_package); packages.add(_package);}
+        else if (action >= 50 && 75 >= action){packages.add(distortData(_package));}
+        else if (action >= 75 && 100 >= action){ /* Discard message */}
+
     }
 }
