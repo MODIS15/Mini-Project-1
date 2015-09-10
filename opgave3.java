@@ -13,27 +13,23 @@ public class opgave3
     boolean SendingThreadIsStillActive = true;
 
     DatagramSocket sendingSocket; //Sending socket
-    String IPDestination = "tiger.itu.dk";
+    String IPDestination = "localhost";
     int sendingToPort = 7;
-
-    int listeningPort = 7;
 
     public static void main(String[] args)
     {
         System.out.println("Opgave 3 start");
         System.out.println("Transmitting packages");
-        opgave3 program = new opgave3(1,200,5);
+        opgave3 program = new opgave3(1,200,5, true);
 
         System.out.println("Amount of datagrams resived: "+ receivedMessages.size());
         System.out.println("Amount of datagrams lost: " + program.amountOfLostDatagrams());
-        System.out.println("Amount of datagrams lost in percentage: " + program.amountOfLostDatagramsInPercentage());
+        System.out.println("Amount of datagrams lost in percentage: " + program.amountOfLostDatagramsInPercentage() + " %");
         System.out.println("Amount of datagrams duplicates: " + program.amountOFDuplicateDatagram());
-        System.out.println("Amount of datagrams duplicates in percentage: " + program.amountOFDuplicateDatagramInPercentage());
-
+        System.out.println("Amount of datagrams duplicates in percentage: " + program.amountOFDuplicateDatagramInPercentage() + " %");
     }
 
-
-    public opgave3(int datagramSize, int amountOfDatagramsSent, int transmissionInterval)
+    public opgave3(int datagramSize, int amountOfDatagramsSent, int transmissionInterval, boolean sendingToLocalHost)
     {
         fillerData = createFillerData(datagramSize);
 
@@ -44,21 +40,31 @@ public class opgave3
             Thread senderThread   = new Thread(sender);
             senderThread.start();
 
-            //Receiving thread
-            //DatagramSocket socket = new DatagramSocket(listeningPort);
-            //socket.setSoTimeout(5000);
+            if (sendingToLocalHost)
+            {
+                IPDestination = "localhost";
+                resiveMessages(new DatagramSocket(sendingToPort));
+            }
+            else{resiveMessages(sendingSocket);}
 
-            sendingSocket.setSoTimeout(5000);
+        }
+        catch (SocketException e) {e.printStackTrace();}
+        catch (IOException e) {e.printStackTrace();}
+    }
+
+    private void resiveMessages(DatagramSocket socket)
+    {
+        try
+        {
+            socket.setSoTimeout(5000);
             byte[] buffer = new byte[1000];
             while(SendingThreadIsStillActive)
             {
                 DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-                //socket.receive(reply);
 
-                sendingSocket.receive(reply);
+                socket.receive(reply);
                 String message = new String(reply.getData());
                 updateOccurrenceRatings(message);
-                //System.out.println(message);
             }
         }
         catch (SocketTimeoutException e ){}
@@ -112,19 +118,16 @@ public class opgave3
 
     public int amountOFDuplicateDatagram()
     {
-        return receivedMessageCounter - receivedMessages.size();
+        return receivedMessageCounter - messageList.length;
     }
 
     public double amountOFDuplicateDatagramInPercentage()
     {
         if(receivedMessages.size()!= 0)
-            return (((double) receivedMessageCounter -(double) receivedMessages.size())/ receivedMessages.size())*100;
+            return (((double) amountOFDuplicateDatagram())/ receivedMessages.size())*100;
         else
             return 0;
     }
-///Not Quite done
-
-
 
 
 public class SendingThread implements Runnable{
@@ -183,7 +186,7 @@ public class SendingThread implements Runnable{
                 catch (IOException e) {e.printStackTrace();} catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                try {Thread.sleep(_timeOut);}
+                try {Thread.sleep(_timeOut*10);}
                 catch (InterruptedException e) {e.printStackTrace();}
             }
 
