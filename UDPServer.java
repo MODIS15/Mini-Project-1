@@ -74,7 +74,7 @@ public class UDPServer
 		try
 		{
 			IPMessageMap.put(request.getAddress(), request.hashCode());
-			System.out.println("UDP packet from: (Anonymous)" + new String(request.getAddress().toString()));
+			System.out.println("UDP packet from:  " + new String(request.getAddress().toString()));
 			System.out.println("Port:" + new String(String.valueOf(request.getPort())).toString());
 			System.out.println("Message: " + new String(dividedMessage[0]));
 			System.out.println("Packet:" + request);
