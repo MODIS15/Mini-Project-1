@@ -1,3 +1,5 @@
+package Opgave_4;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -6,7 +8,7 @@ import java.net.SocketException;
 import java.util.HashMap;
 
 /**
- * This class creates a UDP server using a DatagramSocket to receive packets from a UDPClient.
+ * This class creates a UDP server using a DatagramSocket to receive packets from a Opgave_4.UDPClient.
  */
 public class UDPServer
 {

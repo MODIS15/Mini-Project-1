@@ -1,3 +1,5 @@
+package Opgave_4;
+
 import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;

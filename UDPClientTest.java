@@ -1,10 +1,12 @@
+import Opgave_4.UDPClient;
+import Opgave_4.UDPServer;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- * This test class checks whether the UDPClient only parses messages of 255 chars or less.
+ * This test class checks whether the Opgave_4.UDPClient only parses messages of 255 chars or less.
  */
 public class UDPClientTest
 {
@@ -74,7 +76,7 @@ public class UDPClientTest
     {
         UDPServer server = new UDPServer();
         String data = ADDRESS + "|" + PORT + "|" + invalidString;
-        UDPClient.main(new String[] {data});
+        UDPClient.main(new String[]{data});
 
     }
 
