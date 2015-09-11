@@ -8,6 +8,7 @@
 *.war
 *.ear
 *.class
+*.xml
 
 #IntelliJ Directory
 dir_to_ignore/.idea/

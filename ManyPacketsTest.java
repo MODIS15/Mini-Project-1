@@ -9,7 +9,7 @@ import java.net.*;
  * Test class for assignment 2
  * This class sends messages to localhost
  */
-public class ManyPosts {
+public class ManyPacketsTest {
 
 
     public static void main(String[] args)

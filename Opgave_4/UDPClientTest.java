@@ -1,5 +1,5 @@
-import Opgave_4.UDPClient;
-import Opgave_4.UDPServer;
+package Opgave_4;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
