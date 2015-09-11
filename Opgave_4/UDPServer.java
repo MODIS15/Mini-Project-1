@@ -12,18 +12,25 @@ import java.util.HashMap;
  */
 public class UDPServer
 {
-	private static String[] dividedMessage;
-	private static DatagramPacket request;
-	private static DatagramSocket aSocket = null;
-	private static HashMap<InetAddress, Integer> IPMessageMap;
-	private static final int BUFFER_SIZE = 1000;
-	private static boolean packetReceive; //Testing purpose
+	private String[] dividedMessage;
+	private DatagramPacket request;
+	private DatagramSocket aSocket = null;
+	private HashMap<InetAddress, Integer> IPMessageMap;
+	private final int BUFFER_SIZE = 1000;
 
 	public static void main(String[] args)
 	{
+		UDPServer server = new UDPServer();
+		server.initialize();
+	}
+
+	/**
+	 * Initialize server and wait for input from other clients.
+	 */
+	private void initialize(){
 		try
 		{
-			setPacketReceive(false);
+
 
 			IPMessageMap = new HashMap<>();
 			aSocket = new DatagramSocket(7007);
@@ -39,7 +46,6 @@ public class UDPServer
 				if (isRequestValid())
 				{
 					handleValidMessage();
-					setPacketReceive(true);
 				}
 				else
 				{
@@ -58,7 +64,7 @@ public class UDPServer
 	 * Checks whether the packet address is valid.
 	 * @return true if address is valid.
 	 */
-	private static boolean isRequestValid()
+	private boolean isRequestValid()
 	{
 		if(IPMessageMap.get(request.getAddress()) != null)
 			return dividedMessage[0].hashCode() == Integer.parseInt(dividedMessage[1])
@@ -71,7 +77,7 @@ public class UDPServer
 	 * Prints out packet information (address, port number and message) if the message is valid.
 	 * A message is sent back to the client if packet is received successfully.
 	 */
-	private static void handleValidMessage()
+	private void handleValidMessage()
 	{
 		try
 		{
@@ -89,15 +95,5 @@ public class UDPServer
 			e.printStackTrace();
 			System.out.println("");
 		}
-	}
-
-
-	//Testing methods
-	public static boolean isPacketReceive(){
-		return packetReceive;
-	}
-
-	private static void setPacketReceive(boolean isReceived){
-		packetReceive = isReceived;
 	}
 }
