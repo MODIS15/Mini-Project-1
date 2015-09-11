@@ -2,7 +2,7 @@ import java.io.IOException;
 import java.net.*;
 import java.util.HashSet;
 
-public class opgave3
+public class Estimator
 {
     static HashSet<String> receivedMessages = new HashSet<>(); //Received messages. Used to keep count on duplicate messages
     String[] messageList; //Stores all sent messages.
@@ -20,7 +20,7 @@ public class opgave3
     {
         System.out.println("Opgave 3 start");
         System.out.println("Transmitting packages");
-        opgave3 program = new opgave3(1,200,5, true);
+        Estimator program = new Estimator(1,200,5, true);
 
         System.out.println("Amount of datagrams resived: "+ receivedMessages.size());
         System.out.println("Amount of datagrams lost: " + program.amountOfLostDatagrams());
@@ -29,7 +29,7 @@ public class opgave3
         System.out.println("Amount of datagrams duplicates in percentage: " + program.amountOFDuplicateDatagramInPercentage() + " %");
     }
 
-    public opgave3(int datagramSize, int amountOfDatagramsSent, int transmissionInterval, boolean sendingToLocalHost)
+    public Estimator(int datagramSize, int amountOfDatagramsSent, int transmissionInterval, boolean sendingToLocalHost)
     {
         fillerData = createFillerData(datagramSize);
 
