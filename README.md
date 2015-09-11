@@ -9,7 +9,7 @@ Submit your solution as a single Java-file RFC862.java.
 
 2. Write a drop-in replacement for DatagramSocket which randomly discards, duplicates or reorders a given percentage of sent datagrams. Inherit from DatagramSocket.
 
-Submit your solution as a single Java-file QuestionableDatagramSocket.java.
+Submit your solution as a single Java-file Task_2.QuestionableDatagramSocket.java.
 
 3. Write programs to estimate UDP datagram loss. Your programs must accept as input (a) datagram size, (b) number of datagrams sent and (c) interval between transmissions. The program must output (1) absolute number and percentage of lost datagrams and (2) absolute number and percentage of duplicated datagrams. It is acceptable if your estimate cannot distinguish between losing a single reply, losing a single response, or losing both a reply and a response.
 

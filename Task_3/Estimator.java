@@ -1,12 +1,18 @@
+package Task_3;
+
 import java.io.IOException;
 import java.net.*;
 import java.util.HashSet;
 
+/**
+ * The estimator  is used to estimate the amount of datagrams, received, lost and duplicated.
+ * It will also show the percentage of the anomalies
+ */
 public class Estimator
 {
-    static HashSet<String> receivedMessages = new HashSet<>(); //Received messages. Used to keep count on duplicate messages
+    static HashSet<String> receivedPackets = new HashSet<>(); //Received messages. Used to keep count on duplicate messages
     String[] messageList; //Stores all sent messages.
-    int receivedMessageCounter;
+    int receivedPacketCounter;
 
     SendingThread sender;         //Sending thread. Splitting receiver and sender in two different threads
     String fillerData;            //Filler data used to append package data to adjust package size
@@ -22,13 +28,16 @@ public class Estimator
         System.out.println("Transmitting packages");
         Estimator program = new Estimator(1,200,5, true);
 
-        System.out.println("Amount of datagrams resived: "+ receivedMessages.size());
-        System.out.println("Amount of datagrams lost: " + program.amountOfLostDatagrams());
-        System.out.println("Amount of datagrams lost in percentage: " + program.amountOfLostDatagramsInPercentage() + " %");
-        System.out.println("Amount of datagrams duplicates: " + program.amountOFDuplicateDatagram());
-        System.out.println("Amount of datagrams duplicates in percentage: " + program.amountOFDuplicateDatagramInPercentage() + " %");
+        program.calculateAll();
     }
 
+    /**
+     * Constructer of estimator class.
+     * @param datagramSize
+     * @param amountOfDatagramsSent
+     * @param transmissionInterval
+     * @param sendingToLocalHost
+     */
     public Estimator(int datagramSize, int amountOfDatagramsSent, int transmissionInterval, boolean sendingToLocalHost)
     {
         fillerData = createFillerData(datagramSize);
@@ -43,16 +52,25 @@ public class Estimator
             if (sendingToLocalHost)
             {
                 IPDestination = "localhost";
-                resiveMessages(new DatagramSocket(sendingToPort));
+                receivePackets(new DatagramSocket(sendingToPort));
             }
-            else{resiveMessages(sendingSocket);}
+            else{
+                receivePackets(sendingSocket);}
 
         }
         catch (SocketException e) {e.printStackTrace();}
         catch (IOException e) {e.printStackTrace();}
     }
 
-    private void resiveMessages(DatagramSocket socket)
+
+    //Packet methods
+
+    /**
+     * Constantly receives packets while thread is still alive.
+     * It will also update the number of received messages
+     * @param socket
+     */
+    private void receivePackets(DatagramSocket socket)
     {
         try
         {
@@ -72,14 +90,27 @@ public class Estimator
         catch (IOException e) {e.printStackTrace();}
     }
 
-    public int getReceivedMessageCounter() {return receivedMessageCounter;}
+    /**
+     * Returns the number of received packets
+     * @return interger
+     */
+    public int getReceivedPacketCounter() {return receivedPacketCounter;}
 
+    /**
+     * increment number of received packet and store the data in the packet
+     * @param reply
+     */
     private void updateOccurrenceRatings(String reply)
     {
-        receivedMessageCounter++;
-        receivedMessages.add(reply);
+        receivedPacketCounter++;
+        receivedPackets.add(reply);
     }
 
+    /**
+     * create  filler data to be used when sending packet
+     * @param memorySize
+     * @return
+     */
     private String createFillerData(int memorySize)
     {
         //Minimum String memory usage (bytes) = 8 * (int) ((((no chars) * 2) + 45) / 8)
@@ -102,34 +133,70 @@ public class Estimator
         return _filerData;
     }
 
-///Not Quite done
+
+
+    //Calculate methods
+
+    /**
+     * Calculate amount of datagram, received, lost and duplicated and print the results
+     */
+    private void calculateAll(){
+        System.out.println("Amount of datagrams received: " + receivedPackets.size());
+        System.out.println("Amount of datagrams lost: " + amountOfLostDatagrams());
+        System.out.println("Amount of datagrams lost in percentage: " + amountOfLostDatagramsInPercentage() + " %");
+        System.out.println("Amount of datagrams duplicates: " + amountOFDuplicateDatagram());
+        System.out.println("Amount of datagrams duplicates in percentage: " + amountOFDuplicateDatagramInPercentage() + " %");
+    }
+
+    /**
+     * Returns the number of lost packets
+     * @return integer
+     */
     public int amountOfLostDatagrams()
     {
-        return messageList.length-receivedMessages.size();
+        return messageList.length- receivedPackets.size();
     }
 
+    /**
+     * Returns the percentage of lost packets
+     * @return float
+     */
     public double amountOfLostDatagramsInPercentage()
     {
-        if(receivedMessages.size() != 0)
+        if(receivedPackets.size() != 0)
             return ((((double)amountOfLostDatagrams())/(double)messageList.length)*100);
         else
-            return 100;
+            return 100; // percent
     }
 
+    /**
+     * Returns the number of duplicated packets
+     * @return integer
+     */
     public int amountOFDuplicateDatagram()
     {
-        return receivedMessageCounter - messageList.length;
+        return receivedPacketCounter - messageList.length;
     }
 
+    /**
+     * Returns the percentage of duplicated packets
+     * @return double
+     */
     public double amountOFDuplicateDatagramInPercentage()
     {
-        if(receivedMessages.size()!= 0)
-            return (((double) amountOFDuplicateDatagram())/ receivedMessages.size())*100;
+        if(receivedPackets.size()!= 0)
+            return (((double) amountOFDuplicateDatagram())/ receivedPackets.size())*100;
         else
             return 0;
     }
 
 
+
+//Inner class
+
+/**
+     * Innerclass that represents a sending thread, that allows packets to be sent in parallel with other processes
+     */
 public class SendingThread implements Runnable{
 
         DatagramSocket socket;

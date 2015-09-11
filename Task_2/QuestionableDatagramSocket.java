@@ -1,6 +1,5 @@
-/**
- * Created by JakeMullit on 31/08/15.
- */
+package Task_2;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -8,7 +7,11 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Random;
 
-
+/**
+ * This class is a modified version of DatagramSocket. It inherent from the DatagramsSocket class, but adds extra
+ * functionality to simulate packet anomalies such as corrupted, duplicated or missing packets.
+ * These anomalies are all randomly chosen.
+ */
 public class QuestionableDatagramSocket extends DatagramSocket {
 
     ArrayList<DatagramPacket> packages = new ArrayList<>();
@@ -16,17 +19,26 @@ public class QuestionableDatagramSocket extends DatagramSocket {
     Random random = new Random();
     int transmissionInterval;
 
-    public QuestionableDatagramSocket() throws SocketException {
-    }
+
+    //Constructors
+    public QuestionableDatagramSocket() throws SocketException {}
 
     public QuestionableDatagramSocket(int i, int transmissionInterval) throws SocketException{
         super(i);
         this.transmissionInterval = transmissionInterval;
     }
+
+
+    //packet methods
+
+    /**
+     * Send packet to a given host
+     * @param _package
+     */
     @Override
     public void send(DatagramPacket _package)
     {
-        addMessageTOQueue(_package);
+        addPacketTOQueue(_package);
 
         if(random.nextBoolean())
         {
@@ -41,7 +53,30 @@ public class QuestionableDatagramSocket extends DatagramSocket {
         }
     }
 
-    private DatagramPacket distortData(DatagramPacket _package)
+    /**
+     * Add packet to queue
+     * @param _package
+     */
+    private void addPacketTOQueue(DatagramPacket _package)
+    {
+        int action = random.nextInt(100);
+        if (action >= 0 && 25 >= action){packages.add(_package);}
+        else if (action >= 25 && 50 >= action){packages.add(_package); packages.add(_package);}
+        else if (action >= 50 && 75 >= action){packages.add(corruptData(_package));}
+        else if (action >= 75 && 100 >= action){ /* Discard message */}
+
+    }
+
+
+
+    //Corruption methods
+
+    /**
+     * Corrupts the data in packet
+     * @param _package original packet
+     * @return corrupted packet
+     */
+    private DatagramPacket corruptData(DatagramPacket _package)
     {
         String input = new String(_package.getData());
 
@@ -59,6 +94,12 @@ public class QuestionableDatagramSocket extends DatagramSocket {
     }
 
 
+    /**
+     * Rearrange the data inside of the packet
+     * Corrupts it.
+     * @param _input
+     * @return
+     */
     private String disarrange(String _input)
     {
         char[] input = _input.toCharArray();
@@ -75,6 +116,11 @@ public class QuestionableDatagramSocket extends DatagramSocket {
         return String.valueOf(input);
     }
 
+    /**
+     * Discard some of the data inside the packet
+     * @param input original packet
+     * @return corrupted packet
+     */
     private String randomDiscard(String input)
     {
         int interval = input.length();
@@ -89,24 +135,18 @@ public class QuestionableDatagramSocket extends DatagramSocket {
         }
         //Avoid 100% deletion
 
-        return input.substring(substringStart,substringEnd);
+        return input.substring(substringStart, substringEnd);
     }
 
+    /**
+     * Returns a random packet from the queue
+     * @return
+     */
     private DatagramPacket getRandomPackage()
     {
         int randomIndex = random.nextInt(packages.size());
         DatagramPacket _package = packages.get(randomIndex);
         packages.remove(randomIndex);
         return _package;
-    }
-
-    private void addMessageTOQueue(DatagramPacket _package)
-    {
-        int action = random.nextInt(100);
-        if (action >= 0 && 25 >= action){packages.add(_package);}
-        else if (action >= 25 && 50 >= action){packages.add(_package); packages.add(_package);}
-        else if (action >= 50 && 75 >= action){packages.add(distortData(_package));}
-        else if (action >= 75 && 100 >= action){ /* Discard message */}
-
     }
 }
